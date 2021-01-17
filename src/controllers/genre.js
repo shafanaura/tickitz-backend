@@ -1,5 +1,6 @@
 let data = require("../helpers/listMovies");
 let dataGenre = require("../helpers/listGenre");
+const listGenre = require("../helpers/listGenre");
 const { LIMIT_DATA, APP_URL } = process.env;
 
 module.exports = {
@@ -77,6 +78,23 @@ module.exports = {
 					page > 1 ? `${APP_URL}/genres?page=${Number(page) - 1}` : null,
 			},
 		});
+	},
+
+	// read genre db
+	readDb: (req, res) => {
+		if (listGenre.length > 0) {
+			res.json({
+				status: true,
+				data: listGenre,
+				method: req.method,
+				url: req.url,
+			});
+		} else {
+			res.json({
+				status: false,
+				message: "listGenre data is empty",
+			});
+		}
 	},
 
 	// show list genre from listGenre database sort by id

@@ -41,7 +41,7 @@ module.exports = {
 				item.title = req.body.title;
 				item.genre = req.body.genre;
 
-				return movie;
+				return item;
 			}
 		});
 		res.json({

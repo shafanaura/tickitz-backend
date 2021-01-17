@@ -62,7 +62,7 @@ module.exports = {
 				item.title = req.body.title;
 				item.price = req.body.price;
 
-				return cinema;
+				return item;
 			}
 		});
 		res.json({

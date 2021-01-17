@@ -13,7 +13,8 @@ routes
 routes
 	.route("/admin/genres")
 	.post(genreController.create)
-	.get(genreController.read);
+	// .get(genreController.read)
+	.get(genreController.readDb);
 routes.get("/admin/genres/:name", genreController.show);
 
 module.exports = routes;
