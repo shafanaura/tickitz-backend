@@ -2,7 +2,7 @@ let data = require("../helpers/listMovies");
 let dataGenre = require("../helpers/listGenre");
 const { LIMIT_DATA, APP_URL } = process.env;
 
-exports.listMovies = {
+module.exports = {
 	// show list movie sort by genre from params
 	show: (req, res) => {
 		const { page = 1, limit = LIMIT_DATA } = req.query;
@@ -25,7 +25,7 @@ exports.listMovies = {
 		return res.json({
 			status: true,
 			message: "List of movies",
-			results,
+			data: results,
 			pageInfo: {
 				totalData: results.length,
 				currentPage: Number(page),
@@ -65,16 +65,16 @@ exports.listMovies = {
 		return res.json({
 			status: true,
 			message: "List of movies",
-			results,
+			data: results,
 			pageInfo: {
 				totalData: results.length,
 				currentPage: Number(page),
 				nextLink:
 					nextPageData.length > 0
-						? `${APP_URL}/movies?page=${Number(page) + 1}`
+						? `${APP_URL}/genres?page=${Number(page) + 1}`
 						: null,
 				prevLink:
-					page > 1 ? `${APP_URL}/movies?page=${Number(page) - 1}` : null,
+					page > 1 ? `${APP_URL}/genres?page=${Number(page) - 1}` : null,
 			},
 		});
 	},
@@ -92,7 +92,7 @@ exports.listMovies = {
 		dataGenre.push(req.body);
 		res.json({
 			status: true,
-			dataGenre,
+			data: dataGenre,
 			message: "genre data successfully added",
 			method: req.method,
 			url: req.url,
@@ -111,7 +111,7 @@ exports.listMovies = {
 		});
 		res.json({
 			status: true,
-			dataGenre,
+			data: dataGenre,
 			message: "genre data successfully updated",
 			method: req.method,
 			url: req.url,
@@ -119,11 +119,11 @@ exports.listMovies = {
 	},
 
 	delete: (req, res) => {
-		let id = req.params.id;
+		let id = Number(req.params.id);
 		dataGenre = dataGenre.filter((item) => item.id != id);
 		res.json({
 			status: true,
-			dataGenre,
+			data: dataGenre,
 			message: "genre data successfully deleted",
 			method: req.method,
 			url: req.url,

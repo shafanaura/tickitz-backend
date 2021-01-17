@@ -1,6 +1,6 @@
 let movies = require("../helpers/listMovies");
 
-exports.listMovies = {
+module.exports = {
 	show: (req, res) => {
 		const id = req.params.id;
 		const data = movies.filter((movie) => {
@@ -34,12 +34,12 @@ exports.listMovies = {
 		});
 	},
 	update: (req, res) => {
-		const id = req.params.id;
-		movies.filter((movie) => {
-			if (movie.id == id) {
-				movie.id = id;
-				movie.title = req.body.title;
-				movie.genre = req.body.genre;
+		const id = Number(req.params.id);
+		movies.filter((item) => {
+			if (item.id == id) {
+				item.id = id;
+				item.title = req.body.title;
+				item.genre = req.body.genre;
 
 				return movie;
 			}
@@ -53,7 +53,7 @@ exports.listMovies = {
 		});
 	},
 	delete: (req, res) => {
-		let id = req.params.movieId;
+		let id = Number(req.params.id);
 		movies = movies.filter((movie) => movie.id != id);
 		res.json({
 			status: true,

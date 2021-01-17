@@ -1,18 +1,19 @@
 const routes = require("express").Router();
 const genreController = require("../controllers/genre");
 // user
-routes.get("/genres", genreController.listMovies.read);
-routes.get("/genres/:name", genreController.listMovies.show);
+routes.get("/genres", genreController.read);
+routes.get("/genres/:name", genreController.show);
 // admin
 routes
 	.route("/admin/genres/:id")
-	.get(genreController.listMovies.showList)
-	.delete(genreController.listMovies.delete)
-	.put(genreController.listMovies.update);
+	.get(genreController.showList)
+	.delete(genreController.delete)
+	.patch(genreController.update);
 
 routes
 	.route("/admin/genres")
-	.post(genreController.listMovies.create)
-	.get(genreController.listMovies.read);
-routes.get("/admin/genres/:name", genreController.listMovies.show);
+	.post(genreController.create)
+	.get(genreController.read);
+routes.get("/admin/genres/:name", genreController.show);
+
 module.exports = routes;

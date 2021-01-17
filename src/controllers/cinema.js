@@ -1,7 +1,7 @@
 let cinemas = require("../helpers/listCinemas");
 const { LIMIT_DATA, APP_URL } = process.env;
 
-exports.listCinemas = {
+module.exports = {
 	show: (req, res) => {
 		const id = req.params.id;
 		const data = cinemas.filter((cinema) => {
@@ -31,7 +31,7 @@ exports.listCinemas = {
 		return res.json({
 			status: true,
 			message: "List of cinemas",
-			results,
+			data: results,
 			pageInfo: {
 				totalData: results.length,
 				currentPage: Number(page),
@@ -55,12 +55,12 @@ exports.listCinemas = {
 		});
 	},
 	update: (req, res) => {
-		const id = req.params.id;
-		cinemas.filter((cinema) => {
-			if (cinema.id == id) {
-				cinema.id = id;
-				cinema.title = req.body.title;
-				cinema.price = req.body.price;
+		const id = Number(req.params.id);
+		cinemas.filter((item) => {
+			if (item.id == id) {
+				item.id = id;
+				item.title = req.body.title;
+				item.price = req.body.price;
 
 				return cinema;
 			}
@@ -74,7 +74,7 @@ exports.listCinemas = {
 		});
 	},
 	delete: (req, res) => {
-		let id = req.params.cinemaId;
+		let id = Number(req.params.id);
 		cinemas = cinemas.filter((cinema) => cinema.id != id);
 		res.json({
 			status: true,
