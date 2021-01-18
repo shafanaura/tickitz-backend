@@ -1,66 +1,103 @@
-let movies = require("../helpers/listMovies");
+const movieModel = require("../models/movies");
 
-module.exports = {
-	show: (req, res) => {
-		const id = req.params.id;
-		const data = movies.filter((movie) => {
-			return movie.id == id;
-		});
-		res.send(data);
-	},
-	read: (req, res) => {
-		if (movies.length > 0) {
-			res.json({
-				status: true,
-				data: movies,
-				method: req.method,
-				url: req.url,
-			});
-		} else {
-			res.json({
-				status: false,
-				message: "Movies data is empty",
+exports.createMovie = (req, res) => {
+	const data = req.body;
+	movieModel.createMovie(data, (results) => {
+		if (results.affectedRows > 0) {
+			movieModel.getMovieById(results.insertId, (finalResult) => {
+				if (finalResult.length > 0) {
+					return res.json({
+						status: true,
+						message: "Details of movie",
+						results: finalResult[0],
+					});
+				} else {
+					return res.status(400).json({
+						status: false,
+						message: "Failed ro create movie",
+					});
+				}
 			});
 		}
-	},
-	create: (req, res) => {
-		movies.push(req.body);
-		res.json({
-			status: true,
-			data: movies,
-			message: "Movie data successfully added",
-			method: req.method,
-			url: req.url,
-		});
-	},
-	update: (req, res) => {
-		const id = Number(req.params.id);
-		movies.filter((item) => {
-			if (item.id == id) {
-				item.id = id;
-				item.title = req.body.title;
-				item.genre = req.body.genre;
+	});
+};
 
-				return item;
-			}
-		});
-		res.json({
+exports.detailMovie = (req, res) => {
+	const { id } = req.params;
+	movieModel.getMovieById(id, (results) => {
+		if (results.length > 0) {
+			return res.json({
+				status: true,
+				message: "Details of movie",
+				results: results[0],
+			});
+		} else {
+			return res.status(400).json({
+				status: false,
+				message: "Movie not exists",
+			});
+		}
+	});
+};
+
+exports.listMovies = (req, res) => {
+	const cond = req.query;
+	cond.search = cond.search || "";
+	cond.page = Number(cond.page) || 1;
+	cond.limit = Number(cond.limit) || 5;
+	cond.dataLimit = cond.limit * cond.page;
+	cond.offset = (cond.page - 1) * cond.limit;
+	cond.sort = cond.sort || "id";
+	cond.order = cond.order || "ASC";
+	movieModel.getMoviesByCondition(cond, (results) => {
+		return res.json({
 			status: true,
-			data: movies,
-			message: "Movie data successfully updated",
-			method: req.method,
-			url: req.url,
+			message: "List of all movies",
+			results,
 		});
-	},
-	delete: (req, res) => {
-		let id = Number(req.params.id);
-		movies = movies.filter((movie) => movie.id != id);
-		res.json({
-			status: true,
-			data: movies,
-			message: "Movie data successfully deleted",
-			method: req.method,
-			url: req.url,
-		});
-	},
+	});
+};
+
+exports.deleteMovie = (req, res) => {
+	const { id } = req.params;
+	movieModel.getMovieById(id, (initialResult) => {
+		if (initialResult.length > 0) {
+			movieModel.deleteMovieById(id, (results) => {
+				return res.json({
+					status: true,
+					message: "Data deleted successfully",
+					results: initialResult[0],
+				});
+			});
+		} else {
+			return res.json({
+				status: true,
+				message: "Failed to delete data",
+			});
+		}
+	});
+};
+
+exports.updateMovie = (req, res) => {
+	const { id } = req.params;
+	const data = req.body;
+	movieModel.getMovieById(id, (initialResult) => {
+		if (initialResult.length > 0) {
+			movieModel.updateMovie(id, data, (results) => {
+				return res.json({
+					status: true,
+					message: "data successfully updated",
+					results: {
+						...initialResult[0],
+						...data,
+					},
+				});
+			});
+		} else {
+			return res.json({
+				status: true,
+				message: "Failed to update data",
+			});
+		}
+	});
 };
