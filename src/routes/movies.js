@@ -1,12 +1,13 @@
 const routes = require("express").Router();
 const movieController = require("../controllers/movie");
+const validators = require("../middlewares/validators");
 // user
 routes.get("/movies", movieController.listMovies);
 routes.get("/movies/:id", movieController.detailMovie);
 // admin
 routes
 	.route("/admin/movies")
-	.post(movieController.createMovie)
+	.post(validators.userInfo, movieController.createMovie)
 	.get(movieController.listMovies);
 routes
 	.route("/admin/movies/:id")

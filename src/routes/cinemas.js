@@ -9,7 +9,7 @@ routes
 	.post(cinemaController.createCinema)
 	.get(cinemaController.listCinemas);
 routes
-	.route("/admin/cinemas/:id")
+	.route("/admin/cinema/:id")
 	.get(cinemaController.detailCinema)
 	.delete(cinemaController.deleteCinema)
 	.patch(cinemaController.updateCinema);
