@@ -1,17 +1,17 @@
 const routes = require("express").Router();
 const cinemaController = require("../controllers/cinema");
 // user
-routes.get("/cinemas", cinemaController.read);
-routes.get("/cinemas/:id", cinemaController.show);
+routes.get("/cinemas", cinemaController.listCinemas);
+routes.get("/cinemas/:id", cinemaController.detailCinema);
 // admin
 routes
 	.route("/admin/cinemas")
-	.post(cinemaController.create)
-	.get(cinemaController.read);
+	.post(cinemaController.createCinema)
+	.get(cinemaController.listCinemas);
 routes
 	.route("/admin/cinemas/:id")
-	.get(cinemaController.show)
-	.patch(cinemaController.update)
-	.delete(cinemaController.delete);
+	.get(cinemaController.detailCinema)
+	.delete(cinemaController.deleteCinema)
+	.patch(cinemaController.updateCinema);
 
 module.exports = routes;

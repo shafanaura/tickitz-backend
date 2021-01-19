@@ -1,87 +1,103 @@
-let cinemas = require("../helpers/listCinemas");
-const { LIMIT_DATA, APP_URL } = process.env;
+const cinemaModel = require("../models/cinemas");
 
-module.exports = {
-	show: (req, res) => {
-		const id = req.params.id;
-		const data = cinemas.filter((cinema) => {
-			return cinema.id == id;
-		});
-		res.send(data);
-	},
-	read: (req, res) => {
-		const { page = 1, limit = LIMIT_DATA } = req.query;
-		const paging = Number(page * limit) - limit;
-		const nextPage = Number(page + 1);
-		let nextPageData = [];
-		const offset = limit * page;
-
-		let results = [];
-
-		if (cinemas.length > 0) {
-			nextPageData = cinemas.slice(nextPage, offset);
-			results = cinemas.slice(paging, offset);
-		} else {
-			res.json({
-				status: false,
-				message: "cinemas data is empty",
+exports.createCinema = (req, res) => {
+	const data = req.body;
+	cinemaModel.createCinema(data, (results) => {
+		if (results.affectedRows > 0) {
+			cinemaModel.getCinemaById(results.insertId, (finalResult) => {
+				if (finalResult.length > 0) {
+					return res.json({
+						status: true,
+						message: "Details of cinema",
+						results: finalResult[0],
+					});
+				} else {
+					return res.status(400).json({
+						status: false,
+						message: "Failed ro create cinema",
+					});
+				}
 			});
 		}
+	});
+};
 
+exports.detailCinema = (req, res) => {
+	const { id } = req.params;
+	cinemaModel.getCinemaById(id, (results) => {
+		if (results.length > 0) {
+			return res.json({
+				status: true,
+				message: "Details of cinema",
+				results: results[0],
+			});
+		} else {
+			return res.status(400).json({
+				status: false,
+				message: "cinema not exists",
+			});
+		}
+	});
+};
+
+exports.listCinemas = (req, res) => {
+	const cond = req.query;
+	cond.search = cond.search || "";
+	cond.page = Number(cond.page) || 1;
+	cond.limit = Number(cond.limit) || 5;
+	cond.dataLimit = cond.limit * cond.page;
+	cond.offset = (cond.page - 1) * cond.limit;
+	cond.sort = cond.sort || "id";
+	cond.order = cond.order || "ASC";
+	cinemaModel.getCinemasByCondition(cond, (results) => {
 		return res.json({
 			status: true,
-			message: "List of cinemas",
-			data: results,
-			pageInfo: {
-				totalData: results.length,
-				currentPage: Number(page),
-				nextLink:
-					nextPageData.length > 0
-						? `${APP_URL}cinemas?page=${Number(page) + 1}`
-						: null,
-				prevLink:
-					page > 1 ? `${APP_URL}cinemas?page=${Number(page) - 1}` : null,
-			},
+			message: "List of all cinemas",
+			results,
 		});
-	},
-	create: (req, res) => {
-		cinemas.push(req.body);
-		res.json({
-			status: true,
-			data: cinemas,
-			message: "cinema data successfully added",
-			method: req.method,
-			url: req.url,
-		});
-	},
-	update: (req, res) => {
-		const id = Number(req.params.id);
-		cinemas.filter((item) => {
-			if (item.id == id) {
-				item.id = id;
-				item.title = req.body.title;
-				item.price = req.body.price;
+	});
+};
 
-				return item;
-			}
-		});
-		res.json({
-			status: true,
-			data: cinemas,
-			message: "cinema data successfully updated",
-			method: req.method,
-			url: req.url,
-		});
-	},
-	delete: (req, res) => {
-		let id = Number(req.params.id);
-		cinemas = cinemas.filter((cinema) => cinema.id != id);
-		res.json({
-			status: true,
-			data: cinemas,
-			message: "cinema data successfully deleted",
-			method: req.method,
-			url: req.url,
-		});
-	},
+exports.deleteCinema = (req, res) => {
+	const { id } = req.params;
+	cinemaModel.getCinemaById(id, (initialResult) => {
+		if (initialResult.length > 0) {
+			cinemaModel.deleteCinemaById(id, (results) => {
+				return res.json({
+					status: true,
+					message: "Data deleted successfully",
+					results: initialResult[0],
+				});
+			});
+		} else {
+			return res.json({
+				status: true,
+				message: "Failed to delete data",
+			});
+		}
+	});
+};
+
+exports.updateCinema = (req, res) => {
+	const { id } = req.params;
+	const data = req.body;
+	cinemaModel.getCinemaById(id, (initialResult) => {
+		if (initialResult.length > 0) {
+			cinemaModel.updateCinema(id, data, (results) => {
+				return res.json({
+					status: true,
+					message: "data successfully updated",
+					results: {
+						...initialResult[0],
+						...data,
+					},
+				});
+			});
+		} else {
+			return res.json({
+				status: true,
+				message: "Failed to update data",
+			});
+		}
+	});
 };
