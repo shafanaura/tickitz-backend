@@ -2,12 +2,6 @@ const movieModel = require("../models/movies");
 
 exports.createMovie = (req, res) => {
 	const data = req.body;
-	if (!req.body.title) {
-		return res.status(400).json({
-			message: "Please fill in all the required fields.",
-			fields: ["title"],
-		});
-	}
 	movieModel.createMovie(data, (results) => {
 		if (results.affectedRows > 0) {
 			movieModel.getMovieById(results.insertId, (finalResult) => {
