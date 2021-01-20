@@ -8,11 +8,13 @@ routes.get("/movies/:id", movieController.detailMovie);
 routes
 	.route("/admin/movies")
 	.post(movieController.createMovie)
+	.put(movieController.createMovie)
 	.get(movieController.listMovies);
 routes
 	.route("/admin/movies/:id")
 	.get(movieController.detailMovie)
 	.delete(movieController.deleteMovie)
-	.patch(movieController.updateMovie);
+	.patch(movieController.updateMovie)
+	.put(movieController.updateMovie);
 
 module.exports = routes;
