@@ -64,7 +64,7 @@ exports.updateGenre = (req, res) => {
 			});
 		} else {
 			return res.json({
-				status: true,
+				status: false,
 				message: "Failed to update data",
 			});
 		}

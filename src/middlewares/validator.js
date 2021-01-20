@@ -1,8 +1,10 @@
 const { body, validationResult } = require("express-validator");
 
 module.exports = {
-	charInfo: [
+	movieInfo: [
 		body("title", "Please insert min 3 character").isLength({ min: 3 }),
+	],
+	genreInfo: [
 		body("genre", "Please insert min 3 character").isLength({ min: 3 }),
 	],
 	// Checking Validation Result

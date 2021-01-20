@@ -14,9 +14,9 @@ routes
 
 routes
 	.route("/admin/genres")
-	.post(genreController.createGenre)
-	.get(validator.charInfo, validator.result, genreController.listGenres)
-	.put(validator.charInfo, validator.result, genreController.listGenres);
+	.post(validator.genreInfo, validator.result, genreController.createGenre)
+	.get(genreController.listGenres)
+	.put(validator.genreInfo, validator.result, genreController.createGenre);
 // 	.get(genreController.readDb);
 // routes.get("/admin/genres/:name", genreController.show);
 
