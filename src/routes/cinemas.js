@@ -8,11 +8,13 @@ routes.get("/cinemas/:id", cinemaController.detailCinema);
 routes
 	.route("/admin/cinemas")
 	.post(validator.charInfo, validator.result, cinemaController.createCinema)
+	.put(validator.charInfo, validator.result, cinemaController.createCinema)
 	.get(cinemaController.listCinemas);
 routes
 	.route("/admin/cinema/:id")
 	.get(cinemaController.detailCinema)
 	.delete(cinemaController.deleteCinema)
-	.patch(cinemaController.updateCinema);
+	.patch(cinemaController.updateCinema)
+	.put(cinemaController.updateCinema);
 
 module.exports = routes;

@@ -3,6 +3,7 @@ const { body, validationResult } = require("express-validator");
 module.exports = {
 	charInfo: [
 		body("title", "Please insert min 3 character").isLength({ min: 3 }),
+		body("genre", "Please insert min 3 character").isLength({ min: 3 }),
 	],
 	// Checking Validation Result
 	result: (req, res, next) => {
