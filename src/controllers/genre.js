@@ -1,150 +1,110 @@
-// let data = require("../helpers/listMovies");
-// let dataGenre = require("../helpers/listGenre");
-// const listGenre = require("../helpers/listGenre");
-// const { LIMIT_DATA, APP_URL } = process.env;
+const genreModel = require("../models/genres");
+const { APP_URL } = process.env;
 
-// module.exports = {
-// 	// show list movie sort by genre from params
-// 	show: (req, res) => {
-// 		const { page = 1, limit = LIMIT_DATA } = req.query;
-// 		const genre = req.params.name;
-// 		const paging = Number(page * limit) - limit;
-// 		const nextPage = Number(page + 1);
-// 		let nextPageData = [];
-// 		const offset = limit * page;
+exports.createGenre = (req, res) => {
+	const data = req.body;
+	genreModel.createGenre(data, (results) => {
+		console.log(results);
+		return res.json({
+			status: true,
+			message: "Genre created successfully",
+			results: {
+				id: results.insertId,
+				...data,
+			},
+		});
+	});
+};
 
-// 		let results = [];
+exports.listGenres = (req, res) => {
+	const cond = req.query;
+	cond.search = cond.search || "";
+	cond.page = Number(cond.page) || 1;
+	cond.limit = Number(cond.limit) || 5;
+	cond.dataLimit = cond.limit * cond.page;
+	cond.offset = (cond.page - 1) * cond.limit;
+	cond.sort = cond.sort || "id";
+	cond.order = cond.order || "ASC";
 
-// 		results = data.filter((movie) => {
-// 			return movie.genre
-// 				.toLocaleLowerCase()
-// 				.includes(genre.toLocaleLowerCase());
-// 		});
-// 		nextPageData = results.slice(nextPage, offset);
-// 		results = results.slice(paging, offset);
+	genreModel.getGenresByCondition(cond, (results) => {
+		return res.json({
+			status: true,
+			message: "List of all genres",
+			results,
+			pageInfo: {
+				totalData: results.length,
+				currentPage: Number(cond.page),
+				nextLink:
+					results.length > 0
+						? `${APP_URL}genres?page=${Number(cond.page) + 1}`
+						: null,
+				prevLink:
+					cond.page > 1
+						? `${APP_URL}genres?page=${Number(cond.page) - 1}`
+						: null,
+			},
+		});
+	});
+};
 
-// 		return res.json({
-// 			status: true,
-// 			message: "List of movies",
-// 			data: results,
-// 			pageInfo: {
-// 				totalData: results.length,
-// 				currentPage: Number(page),
-// 				nextLink:
-// 					nextPageData.length > 0
-// 						? `${APP_URL}/movies?page=${Number(page) + 1}`
-// 						: null,
-// 				prevLink:
-// 					page > 1 ? `${APP_URL}/movies?page=${Number(page) - 1}` : null,
-// 			},
-// 		});
-// 	},
+exports.updateGenre = (req, res) => {
+	const { id } = req.params;
+	const data = req.body;
+	genreModel.getGenreById(id, (initialResult) => {
+		if (initialResult.length > 0) {
+			genreModel.updateGenre(id, data, (results) => {
+				return res.json({
+					status: true,
+					message: "data successfully updated",
+					results: {
+						...initialResult[0],
+						...data,
+					},
+				});
+			});
+		} else {
+			return res.json({
+				status: true,
+				message: "Failed to update data",
+			});
+		}
+	});
+};
 
-// 	// read genre list movie sort by genre search query
-// 	read: (req, res) => {
-// 		const { page = 1, limit = LIMIT_DATA, genre = null } = req.query;
-// 		const paging = Number(page * limit) - limit;
-// 		const nextPage = Number(page + 1);
-// 		let nextPageData = [];
-// 		const offset = limit * page;
+exports.deleteGenre = (req, res) => {
+	const { id } = req.params;
+	genreModel.getGenreById(id, (initialResult) => {
+		if (initialResult.length > 0) {
+			genreModel.deleteGenreById(id, (results) => {
+				return res.json({
+					status: true,
+					message: "Data deleted successfully",
+					results: initialResult[0],
+				});
+			});
+		} else {
+			return res.json({
+				status: false,
+				message: "Failed to delete data",
+			});
+		}
+	});
+};
 
-// 		let results = [];
-
-// 		if (genre) {
-// 			results = data.filter((movie) => {
-// 				return movie.genre
-// 					.toLocaleLowerCase()
-// 					.includes(genre.toLocaleLowerCase());
-// 			});
-// 			nextPageData = results.slice(nextPage, offset);
-// 			results = results.slice(paging, offset);
-// 		} else {
-// 			nextPageData = data.slice(nextPage, offset);
-// 			results = data.slice(paging, offset);
-// 		}
-
-// 		return res.json({
-// 			status: true,
-// 			message: "List of movies",
-// 			data: results,
-// 			pageInfo: {
-// 				totalData: results.length,
-// 				currentPage: Number(page),
-// 				nextLink:
-// 					nextPageData.length > 0
-// 						? `${APP_URL}/genres?page=${Number(page) + 1}`
-// 						: null,
-// 				prevLink:
-// 					page > 1 ? `${APP_URL}/genres?page=${Number(page) - 1}` : null,
-// 			},
-// 		});
-// 	},
-
-// 	// read genre db
-// 	readDb: (req, res) => {
-// 		if (listGenre.length > 0) {
-// 			res.json({
-// 				status: true,
-// 				data: listGenre,
-// 				method: req.method,
-// 				url: req.url,
-// 			});
-// 		} else {
-// 			res.json({
-// 				status: false,
-// 				message: "listGenre data is empty",
-// 			});
-// 		}
-// 	},
-
-// 	// show list genre from listGenre database sort by id
-// 	showList: (req, res) => {
-// 		const id = req.params.id;
-// 		const data = dataGenre.filter((item) => {
-// 			return item.id == id;
-// 		});
-// 		res.send(data);
-// 	},
-
-// 	create: (req, res) => {
-// 		dataGenre.push(req.body);
-// 		res.json({
-// 			status: true,
-// 			data: dataGenre,
-// 			message: "genre data successfully added",
-// 			method: req.method,
-// 			url: req.url,
-// 		});
-// 	},
-
-// 	update: (req, res) => {
-// 		const id = Number(req.params.id);
-// 		dataGenre.filter((item) => {
-// 			if (item.id == id) {
-// 				item.id = id;
-// 				item.genre = req.body.genre;
-
-// 				return dataGenre;
-// 			}
-// 		});
-// 		res.json({
-// 			status: true,
-// 			data: dataGenre,
-// 			message: "genre data successfully updated",
-// 			method: req.method,
-// 			url: req.url,
-// 		});
-// 	},
-
-// 	delete: (req, res) => {
-// 		let id = Number(req.params.id);
-// 		dataGenre = dataGenre.filter((item) => item.id != id);
-// 		res.json({
-// 			status: true,
-// 			data: dataGenre,
-// 			message: "genre data successfully deleted",
-// 			method: req.method,
-// 			url: req.url,
-// 		});
-// 	},
-// };
+exports.detailGenre = (req, res) => {
+	const { id } = req.params;
+	genreModel.getGenreById(id, (results) => {
+		if (results.length > 0) {
+			return res.json({
+				status: true,
+				message: "Details of Genre",
+				results: results[0],
+			});
+		} else {
+			return res.status(400).json({
+				status: false,
+				message: "Genre not exists",
+			});
+		}
+	});
+};

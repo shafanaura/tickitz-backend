@@ -1,25 +1,62 @@
 const movieModel = require("../models/movies");
+const genreModel = require("../models/genres");
+const movieGenreModel = require("../models/movieGenres");
+const { APP_URL } = process.env;
 
-exports.createMovie = (req, res) => {
+exports.createMovie = async (req, res) => {
 	const data = req.body;
-	movieModel.createMovie(data, (results) => {
-		if (results.affectedRows > 0) {
-			movieModel.getMovieById(results.insertId, (finalResult) => {
-				if (finalResult.length > 0) {
-					return res.json({
-						status: true,
-						message: "Details of movie",
-						results: finalResult[0],
-					});
-				} else {
-					return res.status(400).json({
-						status: false,
-						message: "Failed ro create movie",
-					});
-				}
+	const selectedGenre = [];
+	if (typeof data.idGenre === "object") {
+		const results = await genreModel.checkGenresAsync(data.idGenre);
+		if (results.length !== data.idGenre.length) {
+			return res.json({
+				status: false,
+				message: "Some genre are unavailable",
+			});
+		} else {
+			results.forEach((item) => {
+				selectedGenre.push(item.id);
 			});
 		}
-	});
+	} else if (typeof data.idGenre === "string") {
+		const results = await genreModel.checkGenresAsync([data.idGenre]);
+		if (results.length !== data.idGenre.length) {
+			return res.json({
+				status: false,
+				message: "Some genre are unavailable",
+			});
+		} else {
+			results.forEach((item) => {
+				selectedGenre.push(item.id);
+			});
+		}
+	}
+	console.log(data);
+	const movieData = {
+		title: data.title,
+	};
+	const initialResult = await movieModel.createMoviesAsync(movieData);
+	if (initialResult.affectedRows > 0) {
+		if (selectedGenre.length > 0) {
+			await movieGenreModel.createBulkMovieGenres(
+				initialResult.insertId,
+				selectedGenre,
+			);
+		}
+		const movies = await movieModel.getMovieByIdAsync(initialResult.insertId);
+		if (movies.length > 0) {
+			return res.json({
+				status: true,
+				message: "Movie successfully created",
+				results: movies[0],
+			});
+		} else {
+			return res.status(400).json({
+				status: false,
+				message: "Failed ro create movie",
+			});
+		}
+	}
 };
 
 exports.detailMovie = (req, res) => {
@@ -49,11 +86,24 @@ exports.listMovies = (req, res) => {
 	cond.offset = (cond.page - 1) * cond.limit;
 	cond.sort = cond.sort || "id";
 	cond.order = cond.order || "ASC";
+
 	movieModel.getMoviesByCondition(cond, (results) => {
 		return res.json({
 			status: true,
 			message: "List of all movies",
 			results,
+			pageInfo: {
+				totalData: results.length,
+				currentPage: Number(cond.page),
+				nextLink:
+					results.length > 0
+						? `${APP_URL}movies?page=${Number(cond.page) + 1}`
+						: null,
+				prevLink:
+					cond.page > 1
+						? `${APP_URL}movies?page=${Number(cond.page) - 1}`
+						: null,
+			},
 		});
 	});
 };
@@ -71,7 +121,7 @@ exports.deleteMovie = (req, res) => {
 			});
 		} else {
 			return res.json({
-				status: true,
+				status: false,
 				message: "Failed to delete data",
 			});
 		}

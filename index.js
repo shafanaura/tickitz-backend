@@ -23,7 +23,7 @@ app.use(
 	"/",
 	require("./src/routes/movies"),
 	require("./src/routes/cinemas"),
-	// require("./src/routes/genres"),
+	require("./src/routes/genres"),
 );
 
 app.listen(APP_PORT, () => {

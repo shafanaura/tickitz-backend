@@ -14,10 +14,41 @@ exports.createMovie = (data = {}, cb) => {
 	);
 };
 
+exports.createMoviesAsync = (data = {}, cb) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
+			`INSERT INTO movies (${Object.keys(data).join()}) VALUES (${Object.values(
+				data,
+			)
+				.map((item) => `"${item}"`)
+				.join(",")})`,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
+};
+
 exports.getMovieById = (id, cb) => {
 	dbConn.query(`SELECT * FROM movies WHERE id=${id}`, (err, res, field) => {
 		if (err) throw err;
 		cb(res);
+	});
+};
+
+exports.getMovieByIdAsync = (id, cb) => {
+	return new Promise((resolve, reject) => {
+		const query = dbConn.query(
+			`
+    SELECT * FROM movies WHERE id=${id}
+  `,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+		console.log(query.sql);
 	});
 };
 
