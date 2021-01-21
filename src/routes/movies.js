@@ -7,8 +7,8 @@ routes.get("/movies/:id", movieController.detailMovie);
 // admin
 routes
 	.route("/admin/movies")
-	.post(validator.movieInfo, validator.result, movieController.createMovie)
-	.put(validator.movieInfo, validator.result, movieController.createMovie)
+	.post(movieController.createMovie)
+	.put(movieController.createMovie)
 	.get(movieController.listMovies);
 routes
 	.route("/admin/movies/:id")

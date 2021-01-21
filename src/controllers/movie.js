@@ -1,70 +1,95 @@
 const movieModel = require("../models/movies");
 const genreModel = require("../models/genres");
 const movieGenreModel = require("../models/movieGenres");
+const multer = require("multer");
 const { APP_URL } = process.env;
+const upload = require("../helpers/upload").single("picture");
 
-exports.createMovie = async (req, res) => {
-	const data = req.body;
-	const selectedGenre = [];
-	if (typeof data.idGenre === "object") {
-		const results = await genreModel.checkGenresAsync(data.idGenre);
-		if (results.length !== data.idGenre.length) {
+exports.createMovie = (req, res) => {
+	upload(req, res, async (err) => {
+		const data = req.body;
+		const selectedGenre = [];
+		if (err instanceof multer.MulterError) {
 			return res.json({
 				status: false,
-				message: "Some genre are unavailable",
+				message: "Error uploading file",
 			});
-		} else {
-			results.forEach((item) => {
-				selectedGenre.push(item.id);
-			});
-		}
-	} else if (typeof data.idGenre === "string") {
-		const results = await genreModel.checkGenresAsync([data.idGenre]);
-		if (results.length !== data.idGenre.length) {
+		} else if (err) {
 			return res.json({
 				status: false,
-				message: "Some genre are unavailable",
-			});
-		} else {
-			results.forEach((item) => {
-				selectedGenre.push(item.id);
+				message: "Error uploading file",
 			});
 		}
-	}
-	console.log(data);
-	const movieData = {
-		title: data.title,
-	};
-	console.log(movieData);
-	const initialResult = await movieModel.createMoviesAsync(movieData);
-	if (initialResult.affectedRows > 0) {
-		if (selectedGenre.length > 0) {
-			await movieGenreModel.createBulkMovieGenres(
+		if (typeof data.idGenre === "object") {
+			const results = await genreModel.checkGenresAsync(data.idGenre);
+			if (results.length !== data.idGenre.length) {
+				return res.json({
+					status: false,
+					message: "Some genre are unavailable",
+				});
+			} else {
+				results.forEach((item) => {
+					selectedGenre.push(item.id);
+				});
+			}
+		} else if (typeof data.idGenre === "string") {
+			const results = await genreModel.checkGenresAsync([data.idGenre]);
+			if (results.length !== data.idGenre.length) {
+				return res.json({
+					status: false,
+					message: "Some genre are unavailable",
+				});
+			} else {
+				results.forEach((item) => {
+					selectedGenre.push(item.id);
+				});
+			}
+		}
+		console.log(data);
+		const movieData = {
+			title: data.title,
+			picture: (req.file && req.file.path) || null,
+			// release: data.release,
+			// directed: data.directed,
+			// cast: data.cast,
+			// synopsis: data.synopsis,
+		};
+		console.log(movieData);
+		const initialResult = await movieModel.createMoviesAsync(movieData);
+		if (initialResult.affectedRows > 0) {
+			if (selectedGenre.length > 0) {
+				await movieGenreModel.createBulkMovieGenres(
+					initialResult.insertId,
+					selectedGenre,
+				);
+			}
+			const movies = await movieModel.getMovieByIdWithGenreAsync(
 				initialResult.insertId,
-				selectedGenre,
 			);
-		}
-		const movies = await movieModel.getMovieByIdWithGenreAsync(
-			initialResult.insertId,
-		);
 
-		if (movies.length > 0) {
-			return res.json({
-				status: true,
-				message: "Movie successfully created",
-				results: {
-					id: movies[0].id,
-					title: movies[0].title,
-					genres: movies.map((item) => item.genreName),
-				},
-			});
-		} else {
-			return res.status(400).json({
-				status: false,
-				message: "Failed ro create movie",
-			});
+			if (movies.length > 0) {
+				return res.json({
+					status: true,
+					message: "Movie successfully created",
+					results: {
+						id: movies[0].id,
+						title: movies[0].title,
+						picture: movies[0].picture,
+						// release: movies[0].release,
+						// directed: movies[0].directed,
+						// cast: movies[0].cast,
+						// synopsis: movies[0].synopsis,
+						genres: movies.map((item) => item.genreName),
+					},
+				});
+			} else {
+				return res.status(400).json({
+					status: false,
+					message: "Failed ro create movie",
+				});
+			}
 		}
-	}
+	});
 };
 
 exports.detailMovie = (req, res) => {
