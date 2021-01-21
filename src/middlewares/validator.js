@@ -1,8 +1,26 @@
-const { body, validationResult } = require("express-validator");
+const { check, body, validationResult } = require("express-validator");
+const dbConn = require("../helpers/db");
 
 module.exports = {
 	movieInfo: [
-		body("title", "Please insert min 3 character").isLength({ min: 3 }),
+		body("title").custom((value, { req }) => {
+			return new Promise((resolve, reject) => {
+				dbConn.query(
+					`SELECT id FROM movies WHERE title = ?`,
+					req.body.title,
+					(err, res) => {
+						if (err) {
+							reject(new Error("Server Error"));
+						}
+						if (res.length > 0) {
+							reject(new Error(`${req.body.title} already in use`));
+						}
+
+						resolve(true);
+					},
+				);
+			});
+		}),
 	],
 	genreInfo: [
 		body("genre", "Please insert min 3 character").isLength({ min: 3 }),

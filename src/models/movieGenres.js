@@ -17,9 +17,9 @@ exports.createMovieGenres = (data = {}, cb) => {
 exports.createBulkMovieGenres = async (id, data = []) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`INSERT INTO movie_genres (idMovie, idGenre) VALUES (${Object.keys(
-				(idGenre) => `(${id}, ${idGenre})`,
-			).join()})`,
+			`INSERT INTO movie_genres (idMovie, idGenre) VALUES ${data
+				.map((idGenre) => `(${id}, ${idGenre})`)
+				.join()}`,
 			(err, res, field) => {
 				if (err) reject(err);
 				resolve(res);

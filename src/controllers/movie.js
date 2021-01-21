@@ -35,6 +35,7 @@ exports.createMovie = async (req, res) => {
 	const movieData = {
 		title: data.title,
 	};
+	console.log(movieData);
 	const initialResult = await movieModel.createMoviesAsync(movieData);
 	if (initialResult.affectedRows > 0) {
 		if (selectedGenre.length > 0) {
@@ -43,12 +44,19 @@ exports.createMovie = async (req, res) => {
 				selectedGenre,
 			);
 		}
-		const movies = await movieModel.getMovieByIdAsync(initialResult.insertId);
+		const movies = await movieModel.getMovieByIdWithGenreAsync(
+			initialResult.insertId,
+		);
+
 		if (movies.length > 0) {
 			return res.json({
 				status: true,
 				message: "Movie successfully created",
-				results: movies[0],
+				results: {
+					id: movies[0].id,
+					title: movies[0].title,
+					genres: movies.map((item) => item.genreName),
+				},
 			});
 		} else {
 			return res.status(400).json({
