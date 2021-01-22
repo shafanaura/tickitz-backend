@@ -49,10 +49,11 @@ exports.createMovie = (req, res) => {
 		const movieData = {
 			title: data.title,
 			picture: (req.file && req.file.path) || null,
-			// release: data.release,
-			// directed: data.directed,
-			// cast: data.cast,
-			// synopsis: data.synopsis,
+			releaseDate: data.releaseDate,
+			directed: data.directed,
+			duration: data.duration,
+			cast: data.cast,
+			synopsis: data.synopsis,
 		};
 		console.log(movieData);
 		const initialResult = await movieModel.createMoviesAsync(movieData);
@@ -75,10 +76,11 @@ exports.createMovie = (req, res) => {
 						id: movies[0].id,
 						title: movies[0].title,
 						picture: movies[0].picture,
-						// release: movies[0].release,
-						// directed: movies[0].directed,
-						// cast: movies[0].cast,
-						// synopsis: movies[0].synopsis,
+						releaseDate: movies[0].releaseDate,
+						directed: movies[0].directed,
+						duration: movies[0].duration,
+						cast: movies[0].cast,
+						synopsis: movies[0].synopsis,
 						genres: movies.map((item) => item.genreName),
 					},
 				});
