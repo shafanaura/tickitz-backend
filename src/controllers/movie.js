@@ -54,6 +54,7 @@ exports.createMovie = (req, res) => {
 			duration: data.duration,
 			cast: data.cast,
 			synopsis: data.synopsis,
+			createdBy: req.userData.id,
 		};
 		console.log(movieData);
 		const initialResult = await movieModel.createMoviesAsync(movieData);

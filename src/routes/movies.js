@@ -1,13 +1,14 @@
 const routes = require("express").Router();
 const movieController = require("../controllers/movie");
 const validator = require("../middlewares/validator");
+const authMiddleware = require("../middlewares/auth");
 // user
 routes.get("/movies", movieController.listMovies);
 routes.get("/movies/:id", movieController.detailMovie);
 // admin
 routes
 	.route("/admin/movies")
-	.post(movieController.createMovie)
+	.post(authMiddleware.authCheck, movieController.createMovie)
 	.put(movieController.createMovie)
 	.get(movieController.listMovies);
 routes
