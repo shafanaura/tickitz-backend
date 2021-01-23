@@ -1,21 +1,37 @@
 const routes = require("express").Router();
 const movieController = require("../controllers/movie");
-const validator = require("../middlewares/validator");
 const authMiddleware = require("../middlewares/auth");
-// user
-routes.get("/movies", movieController.listMovies);
-routes.get("/movies/:id", movieController.detailMovie);
-// admin
+const Role = require("../utils/userRoles.utils");
 routes
-	.route("/admin/movies")
-	.post(authMiddleware.authCheck, movieController.createMovie)
-	.put(movieController.createMovie)
+	.route("/movies")
+	.post(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		movieController.createMovie,
+	)
+	.put(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		movieController.createMovie,
+	)
 	.get(movieController.listMovies);
 routes
-	.route("/admin/movies/:id")
+	.route("/movies/:id")
 	.get(movieController.detailMovie)
-	.delete(movieController.deleteMovie)
-	.patch(movieController.updateMovie)
-	.put(movieController.updateMovie);
+	.delete(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		movieController.deleteMovie,
+	)
+	.patch(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		movieController.updateMovie,
+	)
+	.put(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		movieController.updateMovie,
+	);
 
 module.exports = routes;

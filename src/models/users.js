@@ -1,4 +1,5 @@
 const dbConn = require("../helpers/db");
+const Role = require("../utils/userRoles.utils");
 
 exports.getUsersByIdAsync = (id) => {
 	return new Promise((resolve, reject) => {
@@ -43,3 +44,17 @@ exports.createUser = (data) => {
 		);
 	});
 };
+
+// class UserModel {
+// 	tableName = "users";
+// 	create = async ({ username, password, role = Role.SuperUser }) => {
+// 		const sql = `INSERT INTO ${this.tableName} (username, password, role ) VALUES (?,?,?)`;
+
+// 		const result = await query(sql, [username, password, role]);
+// 		const affectedRows = result ? result.affectedRows : 0;
+
+// 		return affectedRows;
+// 	};
+// }
+
+// module.exports = new UserModel();

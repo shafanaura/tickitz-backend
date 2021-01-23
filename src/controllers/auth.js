@@ -2,6 +2,7 @@ const userModel = require("../models/users");
 const bcrypt = require("bcrypt");
 const { APP_KEY } = process.env;
 const jwt = require("jsonwebtoken");
+const Role = require("../utils/userRoles.utils");
 
 exports.login = async (req, res) => {
 	const { username, password } = req.body;
@@ -26,13 +27,14 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-	const { username, password } = req.body;
+	const { username, password, role = Role.SuperUser } = req.body;
 	const isExist = await userModel.getUsersByConditionAsync({ username });
 	if (isExist.length < 1) {
 		const salt = await bcrypt.genSalt();
 		const encryptedPassword = await bcrypt.hash(password, salt);
 		const createUser = await userModel.createUser({
 			username,
+			role,
 			password: encryptedPassword,
 		});
 		if (createUser.insertId > 0) {

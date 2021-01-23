@@ -45,7 +45,6 @@ exports.createMovie = (req, res) => {
 				});
 			}
 		}
-		console.log(data);
 		const movieData = {
 			title: data.title,
 			picture: (req.file && req.file.path) || null,
@@ -56,7 +55,6 @@ exports.createMovie = (req, res) => {
 			synopsis: data.synopsis,
 			createdBy: req.userData.id,
 		};
-		console.log(movieData);
 		const initialResult = await movieModel.createMoviesAsync(movieData);
 		if (initialResult.affectedRows > 0) {
 			if (selectedGenre.length > 0) {
