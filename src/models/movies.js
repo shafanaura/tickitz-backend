@@ -16,14 +16,7 @@ exports.createMovie = (data = {}, cb) => {
 	});
 };
 
-exports.getMovieById = (id, cb) => {
-	dbConn.query(`SELECT * FROM movies WHERE id=${id}`, (err, res, field) => {
-		if (err) throw err;
-		cb(res);
-	});
-};
-
-exports.getMovieByIdAsync = (id, cb) => {
+exports.getMovieById = (id) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
@@ -38,7 +31,7 @@ exports.getMovieByIdAsync = (id, cb) => {
 	});
 };
 
-exports.getMovieByIdWithGenreAsync = (id, cb) => {
+exports.getMovieByIdWithGenre = (id) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
@@ -57,46 +50,45 @@ exports.getMovieByIdWithGenreAsync = (id, cb) => {
 	});
 };
 
-exports.deleteMovieById = (id, cb) => {
-	dbConn.query(`DELETE FROM movies WHERE id=${id}`, (err, res, field) => {
-		if (err) throw err;
-		cb(res);
+exports.deleteMovieById = (id) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(`DELETE FROM movies WHERE id=${id}`, (err, res, field) => {
+			if (err) reject(err);
+			resolve(res);
+		});
 	});
 };
 
-exports.getAllMovies = (cb) => {
-	dbConn.query(`SELECT * FROM movies`, (err, res, field) => {
-		if (err) throw err;
-		cb(res);
+exports.getMoviesByCondition = (cond) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
+			`SELECT * FROM movies WHERE title LIKE "%${cond.search}%"
+			ORDER BY ${cond.sort} ${cond.order} 
+			LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
 	});
 };
 
-exports.getMoviesByCondition = (cond, cb) => {
-	dbConn.query(
-		`SELECT * FROM movies WHERE title LIKE "%${cond.search}%"
-    ORDER BY ${cond.sort} ${cond.order} 
-    LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,
-		(err, res, field) => {
-			if (err) throw err;
-			cb(res);
-		},
-	);
-};
-
-exports.updateMovie = (id, data, cb) => {
-	const key = Object.keys(data);
-	const value = Object.values(data);
-	dbConn.query(
-		`
-    UPDATE movies
-    SET ${key.map((item, index) => `${item}="${value[index]}"`)}
-    WHERE id=${id}
-  `,
-		(err, res, field) => {
-			if (err) throw err;
-			cb(res);
-		},
-	);
+exports.updateMovie = (id, data) => {
+	return new Promise((resolve, reject) => {
+		const key = Object.keys(data);
+		const value = Object.values(data);
+		dbConn.query(
+			`
+			UPDATE movies
+			SET ${key.map((item, index) => `${item}="${value[index]}"`)}
+			WHERE id=${id}
+		`,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
 };
 
 // exports.updateGenreInMovie = (id, data) => {

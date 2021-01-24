@@ -63,7 +63,7 @@ exports.createMovie = (req, res) => {
 					selectedGenre,
 				);
 			}
-			const movies = await movieModel.getMovieByIdWithGenreAsync(
+			const movies = await movieModel.getMovieByIdWithGenre(
 				initialResult.insertId,
 			);
 			// const dataGenre = movies.map((item) => item.genreName);
@@ -96,25 +96,24 @@ exports.createMovie = (req, res) => {
 	});
 };
 
-exports.detailMovie = (req, res) => {
+exports.detailMovie = async (req, res) => {
 	const { id } = req.params;
-	movieModel.getMovieById(id, (results) => {
-		if (results.length > 0) {
-			return res.json({
-				status: true,
-				message: "Details of movie",
-				results: results[0],
-			});
-		} else {
-			return res.status(400).json({
-				status: false,
-				message: "Movie not exists",
-			});
-		}
-	});
+	const results = await movieModel.getMovieById(id);
+	if (results.length > 0) {
+		return res.json({
+			status: true,
+			message: "Details of movie",
+			results: results[0],
+		});
+	} else {
+		return res.status(400).json({
+			status: false,
+			message: "Movie not exists",
+		});
+	}
 };
 
-exports.listMovies = (req, res) => {
+exports.listMovies = async (req, res) => {
 	const cond = req.query;
 	cond.search = cond.search || "";
 	cond.page = Number(cond.page) || 1;
@@ -124,7 +123,8 @@ exports.listMovies = (req, res) => {
 	cond.sort = cond.sort || "id";
 	cond.order = cond.order || "ASC";
 
-	movieModel.getMoviesByCondition(cond, (results) => {
+	const results = await movieModel.getMoviesByCondition(cond);
+	if (results) {
 		return res.json({
 			status: true,
 			message: "List of all movies",
@@ -142,49 +142,49 @@ exports.listMovies = (req, res) => {
 						: null,
 			},
 		});
-	});
+	}
 };
 
-exports.deleteMovie = (req, res) => {
+exports.deleteMovie = async (req, res) => {
 	const { id } = req.params;
-	movieModel.getMovieById(id, (initialResult) => {
-		if (initialResult.length > 0) {
-			movieModel.deleteMovieById(id, (results) => {
-				return res.json({
-					status: true,
-					message: "Data deleted successfully",
-					results: initialResult[0],
-				});
-			});
-		} else {
-			return res.json({
-				status: false,
-				message: "Failed to delete data",
-			});
-		}
-	});
-};
-
-exports.updateMovie = (req, res) => {
-	const { id } = req.params;
-	const data = req.body;
-	movieModel.getMovieById(id, (initialResult) => {
-		if (initialResult.length > 0) {
-			movieModel.updateMovie(id, data, (results) => {
-				return res.json({
-					status: true,
-					message: "data successfully updated",
-					results: {
-						...initialResult[0],
-						...data,
-					},
-				});
-			});
-		} else {
+	const initialResult = await movieModel.getMovieById(id);
+	if (initialResult.length > 0) {
+		const results = await movieModel.deleteMovieById(id);
+		if (results) {
 			return res.json({
 				status: true,
-				message: "Failed to update data",
+				message: "Data deleted successfully",
+				results: initialResult[0],
 			});
 		}
-	});
+	} else {
+		return res.status(404).json({
+			status: false,
+			message: "Failed to delete data",
+		});
+	}
+};
+
+exports.updateMovie = async (req, res) => {
+	const { id } = req.params;
+	const data = req.body;
+	const initialResult = await movieModel.getMovieById(id);
+	if (initialResult.length > 0) {
+		const results = await movieModel.updateMovie(id, data);
+		if (results) {
+			return res.json({
+				status: true,
+				message: "data successfully updated",
+				results: {
+					...initialResult[0],
+					...data,
+				},
+			});
+		}
+	} else {
+		return res.status(404).json({
+			status: true,
+			message: "Failed to update data",
+		});
+	}
 };
