@@ -182,7 +182,7 @@ exports.updateMovie = async (req, res) => {
 			});
 		}
 	} else {
-		return res.status(404).json({
+		return res.json({
 			status: true,
 			message: "Failed to update data",
 		});

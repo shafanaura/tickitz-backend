@@ -78,11 +78,9 @@ exports.updateMovie = (id, data) => {
 		const key = Object.keys(data);
 		const value = Object.values(data);
 		dbConn.query(
-			`
-			UPDATE movies
+			`UPDATE movies
 			SET ${key.map((item, index) => `${item}="${value[index]}"`)}
-			WHERE id=${id}
-		`,
+			WHERE id=${id}`,
 			(err, res, field) => {
 				if (err) reject(err);
 				resolve(res);
