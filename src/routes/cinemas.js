@@ -9,30 +9,30 @@ routes
 		authMiddleware.authCheck,
 		authMiddleware.authRole(Role.Admin),
 		cinemaController.createCinema,
+	)
+	// .put(
+	// 	authMiddleware.authCheck,
+	// 	authMiddleware.authRole(Role.Admin),
+	// 	cinemaController.createCinema,
+	// );
+	.get(cinemaController.listCinemas);
+routes
+	.route("/cinemas/:id")
+	.get(authMiddleware.authCheck, cinemaController.detailCinema)
+	.delete(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		cinemaController.deleteCinema,
+	)
+	.patch(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		cinemaController.updateCinema,
+	)
+	.put(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		cinemaController.updateCinema,
 	);
-// .put(
-// 	authMiddleware.authCheck,
-// 	authMiddleware.authRole(Role.Admin),
-// 	cinemaController.createCinema,
-// )
-// .get(cinemaController.listCinemas);
-// routes
-// 	.route("/cinemas/:id")
-// 	.get(authMiddleware.authCheck, cinemaController.detailCinema)
-// 	.delete(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		cinemaController.deleteCinema,
-// 	)
-// 	.patch(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		cinemaController.updateCinema,
-// 	)
-// 	.put(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		cinemaController.updateCinema,
-// 	);
 
 module.exports = routes;

@@ -55,7 +55,7 @@ exports.getGenreById = (id, cb) => {
 
 exports.getGenresByCondition = (cond, cb) => {
 	dbConn.query(
-		`SELECT * FROM genres WHERE genre LIKE "%${cond.search}%"
+		`SELECT * FROM genres WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order} 
     LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,
 		(err, res, field) => {

@@ -1,20 +1,6 @@
 const dbConn = require("../helpers/db");
 
 exports.createMovie = (data = {}, cb) => {
-	dbConn.query(
-		`INSERT INTO movies (${Object.keys(data).join()}) VALUES (${Object.values(
-			data,
-		)
-			.map((item) => `"${item}"`)
-			.join(",")})`,
-		(err, res, field) => {
-			if (err) throw err;
-			cb(res);
-		},
-	);
-};
-
-exports.createMoviesAsync = (data = {}, cb) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
 			`INSERT INTO movies (${Object.keys(data).join()}) VALUES (${Object.values(
@@ -56,7 +42,7 @@ exports.getMovieByIdWithGenreAsync = (id, cb) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
-			SELECT m.id, m.title, m.releaseDate, m.directed, m.duration, m.cast, m.synopsis, g.genre as genreName
+			SELECT m.id, m.title, m.releaseDate, m.directed, m.duration, m.cast, m.synopsis, g.name as genreName
 			FROM movies m 
 			INNER JOIN movie_genres mg ON m.id = mg.idMovie 
 			INNER JOIN genres g ON g.id = mg.idGenre
@@ -112,3 +98,15 @@ exports.updateMovie = (id, data, cb) => {
 		},
 	);
 };
+
+// exports.updateGenreInMovie = (id, data) => {
+// 	return new Promise((resolve, reject) => {
+// 		dbConn.query(
+// 			`UPDATE movies SET genre = "${data.join(", ")}" WHERE id=${id}`,
+// 			(err, res, field) => {
+// 				if (err) reject(err);
+// 				resolve(res);
+// 			},
+// 		);
+// 	});
+// };

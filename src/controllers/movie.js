@@ -55,7 +55,7 @@ exports.createMovie = (req, res) => {
 			synopsis: data.synopsis,
 			createdBy: req.userData.id,
 		};
-		const initialResult = await movieModel.createMoviesAsync(movieData);
+		const initialResult = await movieModel.createMovie(movieData);
 		if (initialResult.affectedRows > 0) {
 			if (selectedGenre.length > 0) {
 				await movieGenreModel.createBulkMovieGenres(
@@ -66,7 +66,9 @@ exports.createMovie = (req, res) => {
 			const movies = await movieModel.getMovieByIdWithGenreAsync(
 				initialResult.insertId,
 			);
-
+			// const dataGenre = movies.map((item) => item.genreName);
+			// console.log(dataGenre);
+			// await movieModel.updateGenreInMovie(initialResult.insertId, dataGenre);
 			if (movies.length > 0) {
 				return res.json({
 					status: true,
@@ -74,6 +76,7 @@ exports.createMovie = (req, res) => {
 					results: {
 						id: movies[0].id,
 						title: movies[0].title,
+						genre: movies[0].genre,
 						picture: movies[0].picture,
 						releaseDate: movies[0].releaseDate,
 						directed: movies[0].directed,

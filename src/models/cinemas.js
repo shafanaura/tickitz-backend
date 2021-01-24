@@ -34,7 +34,7 @@ exports.getCinemaByIdWithTimeAsync = (id, cb) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
-			SELECT c.id, c.title, c.address, c.price, t.name as timeName
+			SELECT c.id, c.name, c.address, c.price, t.name as timeName
 			FROM cinemas c 
 			INNER JOIN cinema_times ct ON c.id = ct.idCinema 
 			INNER JOIN times t ON t.id = ct.idTime
@@ -72,7 +72,7 @@ exports.getAllCinemas = (cb) => {
 
 exports.getCinemasByCondition = (cond, cb) => {
 	dbConn.query(
-		`SELECT * FROM cinemas WHERE title LIKE "%${cond.search}%"
+		`SELECT * FROM cinemas WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order} 
     LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,
 		(err, res, field) => {
