@@ -14,6 +14,41 @@ exports.createCinema = (data = {}, cb) => {
 	);
 };
 
+exports.createCinemasAsync = (data = {}, cb) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
+			`INSERT INTO cinemas (${Object.keys(
+				data,
+			).join()}) VALUES (${Object.values(data)
+				.map((item) => `"${item}"`)
+				.join(",")})`,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
+};
+
+exports.getCinemaByIdWithTimeAsync = (id, cb) => {
+	return new Promise((resolve, reject) => {
+		const query = dbConn.query(
+			`
+			SELECT c.id, c.title, c.address, c.price, t.name as timeName
+			FROM cinemas c 
+			INNER JOIN cinema_times ct ON c.id = ct.idCinema 
+			INNER JOIN times t ON t.id = ct.idTime
+			WHERE c.id = ${id}
+  		`,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+		console.log(query.sql);
+	});
+};
+
 exports.getCinemaById = (id, cb) => {
 	dbConn.query(`SELECT * FROM cinemas WHERE id=${id}`, (err, res, field) => {
 		if (err) throw err;

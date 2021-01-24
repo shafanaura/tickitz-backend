@@ -1,38 +1,37 @@
 const routes = require("express").Router();
-const cinemaController = require("../controllers/cinema");
+const timeController = require("../controllers/time");
 const authMiddleware = require("../middlewares/auth");
 const Role = require("../utils/userRoles.utils");
-
 routes
-	.route("/cinemas")
+	.route("/times")
 	.post(
 		authMiddleware.authCheck,
 		authMiddleware.authRole(Role.Admin),
-		cinemaController.createCinema,
+		timeController.createTime,
 	);
-// .put(
-// 	authMiddleware.authCheck,
-// 	authMiddleware.authRole(Role.Admin),
-// 	cinemaController.createCinema,
-// )
-// .get(cinemaController.listCinemas);
+// 	.put(
+// 		authMiddleware.authCheck,
+// 		authMiddleware.authRole(Role.Admin),
+// 		timeController.createTime,
+// 	)
+// 	.get(timeController.listTimes);
 // routes
-// 	.route("/cinemas/:id")
-// 	.get(authMiddleware.authCheck, cinemaController.detailCinema)
+// 	.route("/times/:id")
+// 	.get(timeController.detailTime)
 // 	.delete(
 // 		authMiddleware.authCheck,
 // 		authMiddleware.authRole(Role.Admin),
-// 		cinemaController.deleteCinema,
+// 		timeController.deleteTime,
 // 	)
 // 	.patch(
 // 		authMiddleware.authCheck,
 // 		authMiddleware.authRole(Role.Admin),
-// 		cinemaController.updateCinema,
+// 		timeController.updateTime,
 // 	)
 // 	.put(
 // 		authMiddleware.authCheck,
 // 		authMiddleware.authRole(Role.Admin),
-// 		cinemaController.updateCinema,
+// 		timeController.updateTime,
 // 	);
 
 module.exports = routes;

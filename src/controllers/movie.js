@@ -2,8 +2,8 @@ const movieModel = require("../models/movies");
 const genreModel = require("../models/genres");
 const movieGenreModel = require("../models/movieGenres");
 const multer = require("multer");
-const { APP_URL } = process.env;
 const upload = require("../helpers/upload").single("picture");
+const { APP_URL } = process.env;
 
 exports.createMovie = (req, res) => {
 	upload(req, res, async (err) => {
