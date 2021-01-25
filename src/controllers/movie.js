@@ -10,12 +10,12 @@ exports.createMovie = (req, res) => {
 		const data = req.body;
 		const selectedGenre = [];
 		if (err instanceof multer.MulterError) {
-			return res.json({
+			return res.status(400).json({
 				status: false,
 				message: "Error uploading file",
 			});
 		} else if (err) {
-			return res.json({
+			return res.status(400).json({
 				status: false,
 				message: "Error uploading file",
 			});
@@ -23,7 +23,7 @@ exports.createMovie = (req, res) => {
 		if (typeof data.idGenre === "object") {
 			const results = await genreModel.checkGenresAsync(data.idGenre);
 			if (results.length !== data.idGenre.length) {
-				return res.json({
+				return res.status(400).json({
 					status: false,
 					message: "Some genre are unavailable",
 				});
@@ -35,7 +35,7 @@ exports.createMovie = (req, res) => {
 		} else if (typeof data.idGenre === "string") {
 			const results = await genreModel.checkGenresAsync([data.idGenre]);
 			if (results.length !== data.idGenre.length) {
-				return res.json({
+				return res.status(400).json({
 					status: false,
 					message: "Some genre are unavailable",
 				});
@@ -158,7 +158,7 @@ exports.deleteMovie = async (req, res) => {
 			});
 		}
 	} else {
-		return res.status(404).json({
+		return res.status(400).json({
 			status: false,
 			message: "Failed to delete data",
 		});
@@ -182,8 +182,8 @@ exports.updateMovie = async (req, res) => {
 			});
 		}
 	} else {
-		return res.json({
-			status: true,
+		return res.status(400).json({
+			status: false,
 			message: "Failed to update data",
 		});
 	}
