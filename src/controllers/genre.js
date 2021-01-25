@@ -62,7 +62,7 @@ exports.updateGenre = (req, res) => {
 				});
 			});
 		} else {
-			return res.json({
+			return res.status(400).json({
 				status: false,
 				message: "Failed to update data",
 			});
@@ -82,7 +82,7 @@ exports.deleteGenre = (req, res) => {
 				});
 			});
 		} else {
-			return res.json({
+			return res.status(400).json({
 				status: false,
 				message: "Failed to delete data",
 			});
