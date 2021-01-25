@@ -67,9 +67,6 @@ exports.createMovie = (req, res) => {
 			const movies = await movieModel.getMovieByIdWithGenre(
 				initialResult.insertId,
 			);
-			// const dataGenre = movies.map((item) => item.genreName);
-			// console.log(dataGenre);
-			// await movieModel.updateGenreInMovie(initialResult.insertId, dataGenre);
 			if (movies.length > 0) {
 				return res.json({
 					status: true,
@@ -104,7 +101,17 @@ exports.detailMovie = async (req, res) => {
 		return res.json({
 			status: true,
 			message: "Details of movie",
-			results: results[0],
+			results: {
+				id: results[0].id,
+				title: results[0].title,
+				picture: results[0].picture,
+				releaseDate: results[0].releaseDate,
+				directed: results[0].directed,
+				duration: results[0].duration,
+				cast: results[0].cast,
+				synopsis: results[0].synopsis,
+				genreName: results.map(({ genreName }) => genreName),
+			},
 		});
 	} else {
 		return res.status(400).json({
@@ -146,10 +153,10 @@ exports.listMovies = async (req, res) => {
 	});
 	pageInfo.nextLink =
 		cond.page < pageInfo.totalPage
-			? APP_URL.concat(`/movies?${nextQuery}`)
+			? APP_URL.concat(`movies?${nextQuery}`)
 			: null;
 	pageInfo.prevLink =
-		cond.page > 1 ? APP_URL.concat(`/movies?${prevQuery}`) : null;
+		cond.page > 1 ? APP_URL.concat(`movies?${prevQuery}`) : null;
 
 	const results = await movieModel.getMoviesByCondition(cond);
 	if (results) {
@@ -164,7 +171,7 @@ exports.listMovies = async (req, res) => {
 
 exports.deleteMovie = async (req, res) => {
 	const { id } = req.params;
-	const initialResult = await movieModel.getMovieById(id);
+	const initialResult = await movieModel.getMovieByIdWithGenre(id);
 	if (initialResult.length > 0) {
 		const results = await movieModel.deleteMovieById(id);
 		if (results) {
@@ -185,7 +192,7 @@ exports.deleteMovie = async (req, res) => {
 exports.updateMovie = async (req, res) => {
 	const { id } = req.params;
 	const data = req.body;
-	const initialResult = await movieModel.getMovieById(id);
+	const initialResult = await movieModel.getMovieByIdWithGenre(id);
 	if (initialResult.length > 0) {
 		const results = await movieModel.updateMovie(id, data);
 		if (results) {

@@ -20,7 +20,7 @@ exports.getMovieByIdWithGenre = (id) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
-			SELECT m.id, m.title, m.releaseDate, m.directed, m.duration, m.cast, m.synopsis, g.name as genre
+			SELECT m.id, m.title, m.releaseDate, m.directed, m.duration, m.cast, m.synopsis, g.name as genreName
 			FROM movies m 
 			INNER JOIN movie_genres mg ON m.id = mg.idMovie 
 			INNER JOIN genres g ON g.id = mg.idGenre
@@ -45,7 +45,6 @@ exports.getMoviesCountByConditionAsync = (cond) => {
     `,
 			(err, res, field) => {
 				if (err) reject(err);
-				// console.log(field)
 				resolve(res);
 			},
 		);
@@ -65,9 +64,7 @@ exports.deleteMovieById = (id) => {
 exports.getMoviesByCondition = (cond) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`SELECT m.id, m.title FROM movies m 
-			INNER JOIN movie_genres mg ON m.id = mg.idMovie 
-			INNER JOIN genres g ON g.id = mg.idGenre 
+			`SELECT m.id, m.title FROM movies m
 			WHERE m.title LIKE "%${cond.search}%"
 			ORDER BY ${cond.sort} ${cond.order} 
 			LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,
@@ -94,15 +91,3 @@ exports.updateMovie = (id, data) => {
 		);
 	});
 };
-
-// exports.updateGenreInMovie = (id, data) => {
-// 	return new Promise((resolve, reject) => {
-// 		dbConn.query(
-// 			`UPDATE movies SET genre = "${data.join(", ")}" WHERE id=${id}`,
-// 			(err, res, field) => {
-// 				if (err) reject(err);
-// 				resolve(res);
-// 			},
-// 		);
-// 	});
-// };

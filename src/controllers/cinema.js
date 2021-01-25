@@ -3,6 +3,8 @@ const timeModel = require("../models/times");
 const cinemaTimeModel = require("../models/cinemaTimes");
 const multer = require("multer");
 const upload = require("../helpers/upload").single("picture");
+const qs = require("querystring");
+const { APP_URL } = process.env;
 
 exports.createCinema = (req, res) => {
 	upload(req, res, async (err) => {
@@ -85,26 +87,32 @@ exports.createCinema = (req, res) => {
 	});
 };
 
-exports.detailCinema = (req, res) => {
+exports.detailCinema = async (req, res) => {
 	const { id } = req.params;
-	cinemaModel.getCinemaById(id, (results) => {
-		if (results.length > 0) {
-			return res.json({
-				status: true,
-				message: "Details of cinema",
-				results: results[0],
-			});
-		} else {
-			return res.status(400).json({
-				status: false,
-				message: "cinema not exists",
-			});
-		}
-	});
+	const results = await cinemaModel.getCinemaByIdWithTimeAsync(id);
+	if (results.length > 0) {
+		return res.json({
+			status: true,
+			message: "Details of cinema",
+			results: {
+				id: results[0].id,
+				name: results[0].name,
+				picture: results[0].picture,
+				address: results[0].address,
+				price: results[0].price,
+				timeName: results.map(({ timeName }) => timeName),
+			},
+		});
+	} else {
+		return res.status(400).json({
+			status: false,
+			message: "cinema not exists",
+		});
+	}
 };
 
-exports.listCinemas = (req, res) => {
-	const cond = req.query;
+exports.listCinemas = async (req, res) => {
+	const cond = { ...req.query };
 	cond.search = cond.search || "";
 	cond.page = Number(cond.page) || 1;
 	cond.limit = Number(cond.limit) || 5;
@@ -112,13 +120,43 @@ exports.listCinemas = (req, res) => {
 	cond.offset = (cond.page - 1) * cond.limit;
 	cond.sort = cond.sort || "id";
 	cond.order = cond.order || "ASC";
-	cinemaModel.getCinemasByCondition(cond, (results) => {
+
+	const pageInfo = {
+		nextLink: null,
+		prevLink: null,
+		totalData: 0,
+		totalPage: 0,
+		currentPage: 0,
+	};
+
+	const countData = await cinemaModel.getCinemasCountByConditionAsync(cond);
+	pageInfo.totalData = countData[0].totalData;
+	pageInfo.totalPage = Math.ceil(pageInfo.totalData / cond.limit);
+	pageInfo.currentPage = cond.page;
+	const nextQuery = qs.stringify({
+		...req.query,
+		page: cond.page + 1,
+	});
+	const prevQuery = qs.stringify({
+		...req.query,
+		page: cond.page - 1,
+	});
+	pageInfo.nextLink =
+		cond.page < pageInfo.totalPage
+			? APP_URL.concat(`/cinemas?${nextQuery}`)
+			: null;
+	pageInfo.prevLink =
+		cond.page > 1 ? APP_URL.concat(`/cinemas?${prevQuery}`) : null;
+
+	const results = await cinemaModel.getCinemasByCondition(cond);
+	if (results) {
 		return res.json({
 			status: true,
 			message: "List of all cinemas",
 			results,
+			pageInfo,
 		});
-	});
+	}
 };
 
 exports.deleteCinema = (req, res) => {
@@ -141,26 +179,26 @@ exports.deleteCinema = (req, res) => {
 	});
 };
 
-exports.updateCinema = (req, res) => {
+exports.updateCinema = async (req, res) => {
 	const { id } = req.params;
 	const data = req.body;
-	cinemaModel.getCinemaById(id, (initialResult) => {
-		if (initialResult.length > 0) {
-			cinemaModel.updateCinema(id, data, (results) => {
-				return res.json({
-					status: true,
-					message: "data successfully updated",
-					results: {
-						...initialResult[0],
-						...data,
-					},
-				});
-			});
-		} else {
-			return res.status(400).json({
-				status: false,
-				message: "Failed to update data",
+	const initialResult = await cinemaModel.getCinemaByIdWithTimeAsync(id);
+	if (initialResult.length > 0) {
+		const results = cinemaModel.updateCinema(id, data);
+		if (results) {
+			return res.json({
+				status: true,
+				message: "data successfully updated",
+				results: {
+					...initialResult[0],
+					...data,
+				},
 			});
 		}
-	});
+	} else {
+		return res.status(400).json({
+			status: false,
+			message: "Failed to update data",
+		});
+	}
 };
