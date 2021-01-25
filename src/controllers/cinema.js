@@ -9,12 +9,12 @@ exports.createCinema = (req, res) => {
 		const data = req.body;
 		const selectedTime = [];
 		if (err instanceof multer.MulterError) {
-			return res.json({
+			return res.status(400).json({
 				status: false,
 				message: "Error uploading file",
 			});
 		} else if (err) {
-			return res.json({
+			return res.status(400).json({
 				status: false,
 				message: "Error uploading file",
 			});
@@ -22,7 +22,7 @@ exports.createCinema = (req, res) => {
 		if (typeof data.idTime === "object") {
 			const results = await timeModel.checkTimesAsync(data.idTime);
 			if (results.length !== data.idTime.length) {
-				return res.json({
+				return res.status(400).json({
 					status: false,
 					message: "Some Time are unavailable",
 				});
@@ -34,7 +34,7 @@ exports.createCinema = (req, res) => {
 		} else if (typeof data.idTime === "string") {
 			const results = await timeModel.checkTimesAsync([data.idTime]);
 			if (results.length !== data.idTime.length) {
-				return res.json({
+				return res.status(400).json({
 					status: false,
 					message: "Some Time are unavailable",
 				});
@@ -133,7 +133,7 @@ exports.deleteCinema = (req, res) => {
 				});
 			});
 		} else {
-			return res.json({
+			return res.status(400).json({
 				status: true,
 				message: "Failed to delete data",
 			});
@@ -157,7 +157,7 @@ exports.updateCinema = (req, res) => {
 				});
 			});
 		} else {
-			return res.json({
+			return res.status(400).json({
 				status: false,
 				message: "Failed to update data",
 			});

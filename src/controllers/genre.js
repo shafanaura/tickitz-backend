@@ -4,7 +4,6 @@ const { APP_URL } = process.env;
 exports.createGenre = (req, res) => {
 	const data = req.body;
 	genreModel.createGenre(data, (results) => {
-		console.log(results);
 		return res.json({
 			status: true,
 			message: "Genre created successfully",
