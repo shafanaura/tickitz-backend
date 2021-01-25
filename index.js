@@ -26,8 +26,11 @@ app.use(
 	require("./src/routes/movies"),
 	require("./src/routes/cinemas"),
 	require("./src/routes/genres"),
-	require("./src/routes/auth"),
 	require("./src/routes/times"),
+	require("./src/routes/auth"),
+	require("./src/routes/orders"),
+	require("./src/routes/locations"),
+	require("./src/routes/seats"),
 );
 
 app.listen(APP_PORT, () => {

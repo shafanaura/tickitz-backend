@@ -91,3 +91,17 @@ exports.updateMovie = (id, data) => {
 		);
 	});
 };
+
+exports.getMovieById = async (id, cb) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
+			`
+    SELECT * FROM movies WHERE id=${id}
+    `,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
+};

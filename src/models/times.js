@@ -43,10 +43,12 @@ exports.checkTimesAsync = (data = [], cb) => {
 	});
 };
 
-exports.getTimeById = (id, cb) => {
-	dbConn.query(`SELECT * FROM times WHERE id=${id}`, (err, res, field) => {
-		if (err) throw err;
-		cb(res);
+exports.getTimeById = (id) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(`SELECT * FROM times WHERE id=${id}`, (err, res, field) => {
+			if (err) reject(err);
+			resolve(res);
+		});
 	});
 };
 
@@ -80,13 +82,6 @@ exports.updatetime = (id, data, cb) => {
 
 exports.deleteTimeById = (id, cb) => {
 	dbConn.query(`DELETE FROM times WHERE id=${id}`, (err, res, field) => {
-		if (err) throw err;
-		cb(res);
-	});
-};
-
-exports.getTimeById = (id, cb) => {
-	dbConn.query(`SELECT * FROM times WHERE id=${id}`, (err, res, field) => {
 		if (err) throw err;
 		cb(res);
 	});
