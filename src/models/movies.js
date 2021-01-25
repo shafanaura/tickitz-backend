@@ -20,7 +20,7 @@ exports.getMovieByIdWithGenre = (id) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
-			SELECT m.id, m.title, m.releaseDate, m.directed, m.duration, m.cast, m.synopsis, g.title as genre
+			SELECT m.id, m.title, m.releaseDate, m.directed, m.duration, m.cast, m.synopsis, g.name as genre
 			FROM movies m 
 			INNER JOIN movie_genres mg ON m.id = mg.idMovie 
 			INNER JOIN genres g ON g.id = mg.idGenre
