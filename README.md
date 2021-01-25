@@ -1,11 +1,11 @@
-# BACKEND APP WITH NODE AND POSTGRESQL
+# BACKEND APP WITH NODE AND MYSQL
 
-This is non-optimized minimal backend app with postgresql and node. Backend app theme is "E-Commerce"
+This is non-optimized minimal backend app with mysql and node. Backend app theme is "TICKET MOVIE BOOKING"
 
 ## Requirements
 
-- NodeJS v12 LTS
-- PostgreSQL v10 LTS
+- NodeJS v12.18.3
+- MySQL v10.4.11-MariaDB
 
 ## How To Run This App
 
@@ -23,17 +23,31 @@ This is non-optimized minimal backend app with postgresql and node. Backend app 
 
 ## API SPECS
 
-- POST `/api/v1/login` Route for login to existing user
-- POST `/api/v1/register` Route for register new user
-- POST `/api/v1/forgot_password` Route for request reset pasword **(Not done yet)**
-- POST `/api/v1/forgot_password/:code` Route for change password **(Not done yet)**
-- GET `/api/v1/flash_sale` Route for get item on flash sale list
-- GET `/api/v1/products` Route for get all products
-- GET `/api/v1/products/:productId` Route for get products detail
-- GET/PATCH `/api/v1/profile` Route for get and change currently logged user data
-- GET `/api/v1/cart/:itemId` Route for adding items to cart
-- PATCH/DELETE `/api/v1/cart/:itemId` Route for modify item on cart **(Not done yet)**
-- GET/POST `/api/v1/checkout` Route for view calculated items on invoice and confirm order
-- POST `/api/v1/payment/:invoiceId` Route for payment not paid invoice **(Not done yet)**
-
-- POST `/
+- POST `/auth/login` Route for login to existing user
+- POST `/auth/register` Route for register new user
+- POST `/forgot_password` Route for request reset pasword **(Not done yet)**
+- POST `/forgot_password/:code` Route for change password **(Not done yet)**
+  **movies**
+- GET `/movies` Route for get all movies
+- GET `/movies/:id` Route for get movie detail by id
+- POST/PUT `/movies` Route for adding movie
+- PATCH/PUT `/movies/:id` Route for modify item on movie by id
+- DELETE `/movies/:id` Route for delete item on movie by id
+  **genre**
+- GET `/genres` Route for get all genres
+- GET `/genres/:id` Route for get genre detail by id
+- POST/PUT `/genres` Route for adding genre
+- PATCH/PUT `/genres/:id` Route for modify item on genre by id
+- DELETE `/genres/:id` Route for delete item on genre by id
+  **cinema**
+- GET `/cinemas` Route for get all cinemas
+- GET `/cinemas/:id` Route for get cinema detail by id
+- POST/PUT `/cinemas` Route for adding cinema
+- PATCH/PUT `/cinemas/:id` Route for modify item on cinema by id
+- DELETE `/cinemas/:id` Route for delete item on cinema by id
+  **time**
+- GET `/times` Route for get all times
+- GET `/times/:id` Route for get time detail by id
+- POST/PUT `/times` Route for adding time
+- PATCH/PUT `/times/:id` Route for modify item on time by id
+- DELETE `/times/:id` Route for delete item on time by id
