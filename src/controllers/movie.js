@@ -4,6 +4,7 @@ const movieGenreModel = require("../models/movieGenres");
 const multer = require("multer");
 const upload = require("../helpers/upload").single("picture");
 const { APP_URL } = process.env;
+const qs = require("querystring");
 
 exports.createMovie = (req, res) => {
 	upload(req, res, async (err) => {
@@ -98,7 +99,7 @@ exports.createMovie = (req, res) => {
 
 exports.detailMovie = async (req, res) => {
 	const { id } = req.params;
-	const results = await movieModel.getMovieById(id);
+	const results = await movieModel.getMovieByIdWithGenre(id);
 	if (results.length > 0) {
 		return res.json({
 			status: true,
@@ -114,7 +115,7 @@ exports.detailMovie = async (req, res) => {
 };
 
 exports.listMovies = async (req, res) => {
-	const cond = req.query;
+	const cond = { ...req.query };
 	cond.search = cond.search || "";
 	cond.page = Number(cond.page) || 1;
 	cond.limit = Number(cond.limit) || 5;
@@ -123,24 +124,40 @@ exports.listMovies = async (req, res) => {
 	cond.sort = cond.sort || "id";
 	cond.order = cond.order || "ASC";
 
+	const pageInfo = {
+		nextLink: null,
+		prevLink: null,
+		totalData: 0,
+		totalPage: 0,
+		currentPage: 0,
+	};
+
+	const countData = await movieModel.getMoviesCountByConditionAsync(cond);
+	pageInfo.totalData = countData[0].totalData;
+	pageInfo.totalPage = Math.ceil(pageInfo.totalData / cond.limit);
+	pageInfo.currentPage = cond.page;
+	const nextQuery = qs.stringify({
+		...req.query,
+		page: cond.page + 1,
+	});
+	const prevQuery = qs.stringify({
+		...req.query,
+		page: cond.page - 1,
+	});
+	pageInfo.nextLink =
+		cond.page < pageInfo.totalPage
+			? APP_URL.concat(`/movies?${nextQuery}`)
+			: null;
+	pageInfo.prevLink =
+		cond.page > 1 ? APP_URL.concat(`/movies?${prevQuery}`) : null;
+
 	const results = await movieModel.getMoviesByCondition(cond);
 	if (results) {
 		return res.json({
 			status: true,
 			message: "List of all movies",
 			results,
-			pageInfo: {
-				totalData: results.length,
-				currentPage: Number(cond.page),
-				nextLink:
-					results.length > 0
-						? `${APP_URL}movies?page=${Number(cond.page) + 1}`
-						: null,
-				prevLink:
-					cond.page > 1
-						? `${APP_URL}movies?page=${Number(cond.page) - 1}`
-						: null,
-			},
+			pageInfo,
 		});
 	}
 };
