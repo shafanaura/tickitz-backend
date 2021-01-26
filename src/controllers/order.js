@@ -1,4 +1,5 @@
 const orderModel = require("../models/orders");
+const transactionItemModel = require("../models/transactionItems");
 const movieModel = require("../models/movies");
 const cinemaModel = require("../models/cinemas");
 const timeModel = require("../models/times");
@@ -7,7 +8,8 @@ const seatModel = require("../models/seats");
 
 exports.createOrder = async (req, res) => {
 	const data = req.body;
-	const resultsGetMovie = await movieModel.getMovieByIdWithGenre(data.id_movie);
+	const selectedSeat = [];
+	const resultsGetMovie = await movieModel.getMovieByIdWithGenre(data.idMovie);
 	if (resultsGetMovie.length < 1) {
 		return res.status(400).json({
 			status: false,
@@ -15,7 +17,7 @@ exports.createOrder = async (req, res) => {
 		});
 	}
 	const resultsGetCinema = await cinemaModel.getCinemaByIdWithTimeAsync(
-		data.id_cinema,
+		data.idCinema,
 	);
 	if (resultsGetCinema.length < 1) {
 		return res.status(400).json({
@@ -23,7 +25,7 @@ exports.createOrder = async (req, res) => {
 			message: "Cinema not exist",
 		});
 	}
-	const resultsGetTime = await timeModel.getTimeById(data.id_time);
+	const resultsGetTime = await timeModel.getTimeById(data.idTime);
 	if (resultsGetTime.length < 1) {
 		return res.status(400).json({
 			status: false,
@@ -31,7 +33,7 @@ exports.createOrder = async (req, res) => {
 		});
 	}
 	const resultsGetLocation = await locationModel.getLocationById(
-		data.id_location,
+		data.idLocation,
 	);
 	if (resultsGetLocation.length < 1) {
 		return res.status(400).json({
@@ -39,15 +41,72 @@ exports.createOrder = async (req, res) => {
 			message: "Location not exist",
 		});
 	}
-	const resultsGetSeat = await seatModel.getSeatById(data.id_seat);
-	if (resultsGetSeat.length < 1) {
-		return res.status(400).json({
-			status: false,
-			message: "Seat not exist",
-		});
+	if (typeof data.idSeat === "object") {
+		const results = await seatModel.checkSeats(data.idSeat);
+		if (results.length !== data.idSeat.length) {
+			return res.status(400).json({
+				status: false,
+				message: "Some Seat are unavailable",
+			});
+		} else {
+			results.forEach((item) => {
+				selectedSeat.push(item.id);
+			});
+		}
+	} else if (typeof data.idSeat === "string") {
+		const results = await seatModel.checkSeats([data.idSeat]);
+		if (results.length !== data.idSeat.length) {
+			return res.status(400).json({
+				status: false,
+				message: "Some Seat are unavailable",
+			});
+		} else {
+			results.forEach((item) => {
+				selectedSeat.push(item.id);
+			});
+		}
 	}
 	const orderData = {
-		user: req.userData.id,
-		movie: data.id_movie,
+		idUser: req.userData.id,
+		idMovie: data.idMovie,
+		idCinema: data.idCinema,
+		idTime: data.idTime,
+		idLocation: data.idLocation,
+		dateTime: data.dateTime,
 	};
+	const initialResult = await orderModel.createOrder(orderData);
+	console.log(initialResult);
+	console.log(orderData);
+	if (initialResult.affectedRows > 0) {
+		if (selectedSeat.length > 0) {
+			await transactionItemModel.createBulkTransactionItems(
+				initialResult.insertId,
+				selectedSeat,
+			);
+		}
+		const resultsData = await orderModel.getTransactionByIdWithSeat(
+			initialResult.insertId,
+		);
+		if (resultsData.length > 0) {
+			return res.json({
+				status: true,
+				message: "Order successfully created",
+				results: {
+					id: resultsData[0].id,
+					idUser: resultsData[0].idUser,
+					idMovie: resultsData[0].idMovie,
+					idCinema: resultsData[0].idCinema,
+					idTime: resultsData[0].idTime,
+					idLocation: resultsData[0].idLocation,
+					dateTime: resultsData[0].dateTime,
+					seats: resultsData.map((item) => item.seatName),
+				},
+			});
+		} else {
+			return res.status(400).json({
+				status: false,
+				message: "Failed to create order",
+			});
+		}
+	}
 };

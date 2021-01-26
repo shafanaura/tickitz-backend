@@ -87,7 +87,7 @@ exports.createMovie = (req, res) => {
 			} else {
 				return res.status(400).json({
 					status: false,
-					message: "Failed ro create movie",
+					message: "Failed to create movie",
 				});
 			}
 		}

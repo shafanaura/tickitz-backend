@@ -16,20 +16,21 @@ exports.createSeat = (data = {}) => {
 	});
 };
 
-// exports.checkGenres = (data = [], cb) => {
-// 	const query = dbConn.query(
-// 		`
-//   SELECT * FROM genres
-//   WHERE id IN (${data.map((item) => item).join()})
-//   `,
-// 		(err, res, field) => {
-// 			if (err) throw err;
-// 			console.log(field);
-// 			cb(res);
-// 		},
-// 	);
-// 	console.log(query.sql);
-// };
+exports.checkSeats = (data = []) => {
+	return new Promise((resolve, reject) => {
+		const query = dbConn.query(
+			`
+    SELECT * FROM seats
+    WHERE id IN (${data.map((item) => item).join()})
+    `,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+		console.log(query.sql);
+	});
+};
 
 // exports.checkGenresAsync = (data = [], cb) => {
 // 	return new Promise((resolve, reject) => {
