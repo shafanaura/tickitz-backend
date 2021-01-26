@@ -5,8 +5,8 @@ const jwt = require("jsonwebtoken");
 const Role = require("../utils/userRoles.utils");
 
 exports.login = async (req, res) => {
-	const { username, password } = req.body;
-	const existingUser = await userModel.getUsersByConditionAsync({ username });
+	const { email, password } = req.body;
+	const existingUser = await userModel.getUsersByConditionAsync({ email });
 	if (existingUser.length > 0) {
 		const compare = await bcrypt.compare(password, existingUser[0].password);
 		if (compare) {
@@ -22,18 +22,18 @@ exports.login = async (req, res) => {
 	}
 	return res.status(401).json({
 		status: false,
-		message: "Wrong username or password",
+		message: "Wrong email or password",
 	});
 };
 
 exports.register = async (req, res) => {
-	const { username, password, role = Role.SuperUser } = req.body;
-	const isExist = await userModel.getUsersByConditionAsync({ username });
+	const { email, password, role = Role.SuperUser } = req.body;
+	const isExist = await userModel.getUsersByConditionAsync({ email });
 	if (isExist.length < 1) {
 		const salt = await bcrypt.genSalt();
 		const encryptedPassword = await bcrypt.hash(password, salt);
 		const createUser = await userModel.createUser({
-			username,
+			email,
 			role,
 			password: encryptedPassword,
 		});
@@ -51,7 +51,7 @@ exports.register = async (req, res) => {
 	} else {
 		return res.status(400).json({
 			status: false,
-			message: "Register failed, username already exists",
+			message: "Register failed, email already exists",
 		});
 	}
 };
