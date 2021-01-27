@@ -75,8 +75,6 @@ exports.createOrder = async (req, res) => {
 		dateTime: data.dateTime,
 	};
 	const initialResult = await orderModel.createOrder(orderData);
-	console.log(initialResult);
-	console.log(orderData);
 	if (initialResult.affectedRows > 0) {
 		if (selectedSeat.length > 0) {
 			await transactionItemModel.createBulkTransactionItems(
