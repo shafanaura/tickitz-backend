@@ -51,7 +51,7 @@ exports.createCinema = (req, res) => {
 			picture: (req.file && req.file.path) || null,
 			address: data.address,
 			price: data.price,
-			createdBy: req.userData.id,
+			// createdBy: req.userData.id,
 		};
 		const initialResult = await cinemaModel.createCinemasAsync(cinemaData);
 		if (initialResult.affectedRows > 0) {

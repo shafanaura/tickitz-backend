@@ -8,30 +8,30 @@ routes
 		authMiddleware.authCheck,
 		authMiddleware.authRole(Role.Admin),
 		timeController.createTime,
+	)
+	.put(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		timeController.createTime,
+	)
+	.get(timeController.listTimes);
+routes
+	.route("/times/:id")
+	.get(timeController.detailTime)
+	.delete(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		timeController.deleteTime,
+	)
+	.patch(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		timeController.updateTime,
+	)
+	.put(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		timeController.updateTime,
 	);
-// 	.put(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		timeController.createTime,
-// 	)
-// 	.get(timeController.listTimes);
-// routes
-// 	.route("/times/:id")
-// 	.get(timeController.detailTime)
-// 	.delete(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		timeController.deleteTime,
-// 	)
-// 	.patch(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		timeController.updateTime,
-// 	)
-// 	.put(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		timeController.updateTime,
-// 	);
 
 module.exports = routes;

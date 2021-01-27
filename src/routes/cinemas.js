@@ -10,11 +10,11 @@ routes
 		authMiddleware.authRole(Role.Admin),
 		cinemaController.createCinema,
 	)
-	// .put(
-	// 	authMiddleware.authCheck,
-	// 	authMiddleware.authRole(Role.Admin),
-	// 	cinemaController.createCinema,
-	// );
+	.put(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		cinemaController.createCinema,
+	)
 	.get(cinemaController.listCinemas);
 routes
 	.route("/cinemas/:id")

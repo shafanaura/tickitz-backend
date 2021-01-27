@@ -42,7 +42,6 @@ exports.checkTimesAsync = (data = [], cb) => {
 		console.log(query.sql);
 	});
 };
-
 exports.getTimeById = (id) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(`SELECT * FROM times WHERE id=${id}`, (err, res, field) => {
@@ -52,37 +51,59 @@ exports.getTimeById = (id) => {
 	});
 };
 
-exports.getTimesByCondition = (cond, cb) => {
-	dbConn.query(
-		`SELECT * FROM times WHERE time LIKE "%${cond.search}%"
+exports.getTimesByCondition = (cond) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
+			`SELECT * FROM times WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order} 
     LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,
-		(err, res, field) => {
-			if (err) throw err;
-			cb(res);
-		},
-	);
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
 };
 
-exports.updatetime = (id, data, cb) => {
-	const key = Object.keys(data);
-	const value = Object.values(data);
-	dbConn.query(
-		`
+exports.updateTime = (id, data) => {
+	return new Promise((resolve, reject) => {
+		const key = Object.keys(data);
+		const value = Object.values(data);
+		dbConn.query(
+			`
     UPDATE times
     SET ${key.map((item, index) => `${item}="${value[index]}"`)}
     WHERE id=${id}
   `,
-		(err, res, field) => {
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
+};
+exports.deleteTimeById = (id) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(`DELETE FROM times WHERE id=${id}`, (err, res, field) => {
 			if (err) throw err;
 			cb(res);
-		},
-	);
+		});
+	});
 };
 
-exports.deleteTimeById = (id, cb) => {
-	dbConn.query(`DELETE FROM times WHERE id=${id}`, (err, res, field) => {
-		if (err) throw err;
-		cb(res);
+exports.getTimesCountByConditionAsync = (cond) => {
+	return new Promise((resolve, reject) => {
+		const query = dbConn.query(
+			`
+    SELECT COUNT(name) as totalData FROM
+    times WHERE name LIKE "%${cond.search}%"
+    ORDER BY ${cond.sort} ${cond.order}
+    `,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+		console.log(query.sql);
 	});
 };
