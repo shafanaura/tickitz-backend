@@ -20,7 +20,9 @@ exports.getTransactionByIdWithSeat = (id) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
-			SELECT ts.id, ts.idUser, ts.idMovie, ts.idCinema, ts.idTime, ts.idLocation, ts.dateTime, seats.name as seatName
+			SELECT users.email as userName, movies.title, cinemas.name as cinemaName, 
+			times.name as timeName, locations.name as locationName, ts.dateTime, 
+			seats.name as seatName, cinemas.price
 			FROM transactions ts 
 			INNER JOIN users ON ts.idUser = users.id 
 			INNER JOIN movies ON ts.idMovie = movies.id  

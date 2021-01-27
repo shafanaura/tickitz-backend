@@ -212,3 +212,27 @@ exports.updateMovie = async (req, res) => {
 		});
 	}
 };
+
+exports.updateGenreMovie = async (req, res) => {
+	const { id } = req.params;
+	const data = req.body;
+	const initialResult = await movieModel.getMovieByIdWithGenre(id);
+	if (initialResult.length > 0) {
+		const results = await movieModel.updateGenreMovie(id, data);
+		if (results) {
+			return res.json({
+				status: true,
+				message: "data successfully updated",
+				results: {
+					...initialResult[0],
+					...data,
+				},
+			});
+		}
+	} else {
+		return res.status(400).json({
+			status: false,
+			message: "Failed to update data",
+		});
+	}
+};

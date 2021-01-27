@@ -23,10 +23,15 @@ routes
 		authMiddleware.authRole(Role.Admin),
 		movieController.deleteMovie,
 	)
+	// .patch(
+	// 	authMiddleware.authCheck,
+	// 	authMiddleware.authRole(Role.Admin),
+	// 	movieController.updateMovie,
+	// )
 	.patch(
 		authMiddleware.authCheck,
 		authMiddleware.authRole(Role.Admin),
-		movieController.updateMovie,
+		movieController.updateGenreMovie,
 	)
 	.put(
 		authMiddleware.authCheck,

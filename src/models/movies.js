@@ -92,6 +92,22 @@ exports.updateMovie = (id, data) => {
 	});
 };
 
+exports.updateGenreMovie = (id, data) => {
+	return new Promise((resolve, reject) => {
+		const key = Object.keys(data);
+		const value = Object.values(data);
+		dbConn.query(
+			`UPDATE movie_genres
+			SET ${key.map((item, index) => `${item}="${value[index]}"`)}
+			WHERE idMovie=${id}`,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
+};
+
 exports.getMovieById = async (id, cb) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
