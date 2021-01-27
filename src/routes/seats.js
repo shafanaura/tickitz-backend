@@ -8,30 +8,30 @@ routes
 		authMiddleware.authCheck,
 		authMiddleware.authRole(Role.Admin),
 		seatController.createSeat,
+	)
+	.put(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		seatController.createSeat,
+	)
+	.get(seatController.listSeats);
+routes
+	.route("/seats/:id")
+	.get(seatController.detailSeat)
+	.delete(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		seatController.deleteSeat,
+	)
+	.patch(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		seatController.updateSeat,
+	)
+	.put(
+		authMiddleware.authCheck,
+		authMiddleware.authRole(Role.Admin),
+		seatController.updateSeat,
 	);
-// 	.put(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		timeController.createTime,
-// 	)
-// 	.get(timeController.listTimes);
-// routes
-// 	.route("/times/:id")
-// 	.get(timeController.detailTime)
-// 	.delete(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		timeController.deleteTime,
-// 	)
-// 	.patch(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		timeController.updateTime,
-// 	)
-// 	.put(
-// 		authMiddleware.authCheck,
-// 		authMiddleware.authRole(Role.Admin),
-// 		timeController.updateTime,
-// 	);
 
 module.exports = routes;
