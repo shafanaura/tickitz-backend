@@ -1,18 +1,15 @@
 const locationModel = require("../models/locations");
 const { APP_URL } = process.env;
+const status = require("../helpers/Response");
 const qs = require("querystring");
 
 exports.createLocation = async (req, res) => {
 	const data = req.body;
 	const results = await locationModel.createLocation(data);
 	if (results) {
-		return res.json({
-			status: true,
-			message: "Location created successfully",
-			results: {
-				id: results.insertId,
-				...data,
-			},
+		return status.ResponseStatus(res, 200, "Location created successfully", {
+			id: results.insertId,
+			...data,
 		});
 	}
 };
@@ -35,7 +32,7 @@ exports.listLocations = async (req, res) => {
 		currentPage: 0,
 	};
 
-	const countData = await locationModel.getLocationCountByConditionAsync(cond);
+	const countData = await locationModel.getLocationCountByCondition(cond);
 	pageInfo.totalData = countData[0].totalData;
 	pageInfo.totalPage = Math.ceil(pageInfo.totalData / cond.limit);
 	pageInfo.currentPage = cond.page;
@@ -56,12 +53,13 @@ exports.listLocations = async (req, res) => {
 
 	const results = await locationModel.getLocationsByCondition(cond);
 	if (results) {
-		return res.json({
-			status: true,
-			message: "List of all locations",
+		return status.ResponseStatus(
+			res,
+			200,
+			"List of all locations",
 			results,
 			pageInfo,
-		});
+		);
 	}
 };
 
@@ -72,20 +70,13 @@ exports.updateLocation = async (req, res) => {
 	if (initialResult.length > 0) {
 		const results = locationModel.updateLocation(id, data);
 		if (results) {
-			return res.json({
-				status: true,
-				message: "data successfully updated",
-				results: {
-					...initialResult[0],
-					...data,
-				},
+			return status.ResponseStatus(res, 200, "data successfully updated", {
+				...initialResult[0],
+				...data,
 			});
 		}
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Failed to update data",
-		});
+		return status.ResponseStatus(res, 400, "Failed to update data");
 	}
 };
 
@@ -95,17 +86,15 @@ exports.deleteLocation = async (req, res) => {
 	if (initialResult.length > 0) {
 		const results = locationModel.deleteLocationById(id);
 		if (results) {
-			return res.json({
-				status: true,
-				message: "Data deleted successfully",
-				results: initialResult[0],
-			});
+			return status.ResponseStatus(
+				res,
+				200,
+				"Data deleted successfully",
+				initialResult[0],
+			);
 		}
 	} else {
-		return res.status(400).json({
-			status: true,
-			message: "Failed to delete data",
-		});
+		return status.ResponseStatus(res, 400, "Failed to delete data");
 	}
 };
 
@@ -113,15 +102,8 @@ exports.detailLocation = async (req, res) => {
 	const { id } = req.params;
 	const results = await locationModel.getLocationById(id);
 	if (results.length > 0) {
-		return res.json({
-			status: true,
-			message: "Details of Location",
-			results: results[0],
-		});
+		return status.ResponseStatus(res, 200, "Details of Location", results[0]);
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Location not exists",
-		});
+		return status.ResponseStatus(res, 400, "Location not exists");
 	}
 };

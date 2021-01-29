@@ -1,9 +1,10 @@
 const dbConn = require("../helpers/db");
+const table = "locations";
 
 exports.createLocation = (data = {}) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`INSERT INTO locations (${Object.keys(
+			`INSERT INTO ${table} (${Object.keys(
 				data,
 			).join()}) VALUES (${Object.values(data)
 				.map((item) => `"${item}"`)
@@ -18,22 +19,19 @@ exports.createLocation = (data = {}) => {
 
 exports.getLocationById = (id) => {
 	return new Promise((resolve, reject) => {
-		dbConn.query(
-			`SELECT * FROM locations WHERE id=${id}`,
-			(err, res, field) => {
-				if (err) reject(err);
-				resolve(res);
-			},
-		);
+		dbConn.query(`SELECT * FROM ${table} WHERE id=${id}`, (err, res, field) => {
+			if (err) reject(err);
+			resolve(res);
+		});
 	});
 };
 
-exports.getLocationCountByConditionAsync = (cond) => {
+exports.getLocationCountByCondition = (cond) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
     SELECT COUNT(name) as totalData FROM
-    locations WHERE name LIKE "%${cond.search}%"
+    ${table} WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order}
     `,
 			(err, res, field) => {
@@ -48,7 +46,7 @@ exports.getLocationCountByConditionAsync = (cond) => {
 exports.getLocationsByCondition = (cond) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`SELECT * FROM locations WHERE name LIKE "%${cond.search}%"
+			`SELECT * FROM ${table} WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order} 
     LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,
 			(err, res, field) => {
@@ -79,7 +77,7 @@ exports.updateLocation = (id, data) => {
 
 exports.deleteLocationById = (id) => {
 	return new Promise((resolve, reject) => {
-		dbConn.query(`DELETE FROM locations WHERE id=${id}`, (err, res, field) => {
+		dbConn.query(`DELETE FROM ${table} WHERE id=${id}`, (err, res, field) => {
 			if (err) reject(err);
 			resolve(res);
 		});

@@ -4,6 +4,7 @@ const cinemaTimeModel = require("../models/cinemaTimes");
 const multer = require("multer");
 const upload = require("../helpers/upload").single("picture");
 const qs = require("querystring");
+const status = require("../helpers/Response");
 const { APP_URL } = process.env;
 
 exports.createCinema = (req, res) => {
@@ -11,35 +12,23 @@ exports.createCinema = (req, res) => {
 		const data = req.body;
 		const selectedTime = [];
 		if (err instanceof multer.MulterError) {
-			return res.status(400).json({
-				status: false,
-				message: "Error uploading file",
-			});
+			return status.ResponseStatus(res, 400, "Error uploading file");
 		} else if (err) {
-			return res.status(400).json({
-				status: false,
-				message: "Error uploading file",
-			});
+			return status.ResponseStatus(res, 400, "Error uploading file");
 		}
 		if (typeof data.idTime === "object") {
-			const results = await timeModel.checkTimesAsync(data.idTime);
+			const results = await timeModel.checkTimes(data.idTime);
 			if (results.length !== data.idTime.length) {
-				return res.status(400).json({
-					status: false,
-					message: "Some Time are unavailable",
-				});
+				return status.ResponseStatus(res, 400, "Some Time are unavailable");
 			} else {
 				results.forEach((item) => {
 					selectedTime.push(item.id);
 				});
 			}
 		} else if (typeof data.idTime === "string") {
-			const results = await timeModel.checkTimesAsync([data.idTime]);
+			const results = await timeModel.checkTimes([data.idTime]);
 			if (results.length !== data.idTime.length) {
-				return res.status(400).json({
-					status: false,
-					message: "Some Time are unavailable",
-				});
+				return status.ResponseStatus(res, 400, "Some Time are unavailable");
 			} else {
 				results.forEach((item) => {
 					selectedTime.push(item.id);
@@ -53,7 +42,7 @@ exports.createCinema = (req, res) => {
 			price: data.price,
 			// createdBy: req.userData.id,
 		};
-		const initialResult = await cinemaModel.createCinemasAsync(cinemaData);
+		const initialResult = await cinemaModel.createCinemas(cinemaData);
 		if (initialResult.affectedRows > 0) {
 			if (selectedTime.length > 0) {
 				await cinemaTimeModel.createBulkCinemaTimes(
@@ -61,27 +50,20 @@ exports.createCinema = (req, res) => {
 					selectedTime,
 				);
 			}
-			const cinemas = await cinemaModel.getCinemaByIdWithTimeAsync(
+			const cinemas = await cinemaModel.getCinemaByIdWithTime(
 				initialResult.insertId,
 			);
 			if (cinemas.length > 0) {
-				return res.json({
-					status: true,
-					message: "Cinema successfully created",
-					results: {
-						id: cinemas[0].id,
-						name: cinemas[0].name,
-						picture: cinemas[0].picture,
-						address: cinemas[0].address,
-						price: cinemas[0].price,
-						timeName: cinemas.map((item) => item.timeName),
-					},
+				return status.ResponseStatus(res, 200, "Cinema successfully created", {
+					id: cinemas[0].id,
+					name: cinemas[0].name,
+					picture: cinemas[0].picture,
+					address: cinemas[0].address,
+					price: cinemas[0].price,
+					timeName: cinemas.map((item) => item.timeName),
 				});
 			} else {
-				return res.status(400).json({
-					status: false,
-					message: "Failed ro create cinema",
-				});
+				return status.ResponseStatus(res, 400, "Failed ro create cinema");
 			}
 		}
 	});
@@ -91,23 +73,16 @@ exports.detailCinema = async (req, res) => {
 	const { id } = req.params;
 	const results = await cinemaModel.getCinemaByIdWithTimeAsync(id);
 	if (results.length > 0) {
-		return res.json({
-			status: true,
-			message: "Details of cinema",
-			results: {
-				id: results[0].id,
-				name: results[0].name,
-				picture: results[0].picture,
-				address: results[0].address,
-				price: results[0].price,
-				timeName: results.map(({ timeName }) => timeName),
-			},
+		return status.ResponseStatus(res, 200, "Details of cinema", {
+			id: results[0].id,
+			name: results[0].name,
+			picture: results[0].picture,
+			address: results[0].address,
+			price: results[0].price,
+			timeName: results.map(({ timeName }) => timeName),
 		});
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "cinema not exists",
-		});
+		return status.ResponseStatus(res, 400, "Cinema not exists");
 	}
 };
 
@@ -150,33 +125,32 @@ exports.listCinemas = async (req, res) => {
 
 	const results = await cinemaModel.getCinemasByCondition(cond);
 	if (results) {
-		return res.json({
-			status: true,
-			message: "List of all cinemas",
+		return status.ResponseStatus(
+			res,
+			200,
+			"List of all cinemas",
 			results,
 			pageInfo,
-		});
+		);
 	}
 };
 
-exports.deleteCinema = (req, res) => {
+exports.deleteCinema = async (req, res) => {
 	const { id } = req.params;
-	cinemaModel.getCinemaById(id, (initialResult) => {
-		if (initialResult.length > 0) {
-			cinemaModel.deleteCinemaById(id, (results) => {
-				return res.json({
-					status: true,
-					message: "Data deleted successfully",
-					results: initialResult[0],
-				});
-			});
-		} else {
-			return res.status(400).json({
-				status: true,
-				message: "Failed to delete data",
-			});
+	const initialResult = await cinemaModel.getCinemaById(id);
+	if (initialResult.length > 0) {
+		const results = await cinemaModel.deleteCinemaById(id);
+		if (results) {
+			return status.ResponseStatus(
+				res,
+				200,
+				"Data deleted successfully",
+				initialResult[0],
+			);
 		}
-	});
+	} else {
+		return status.ResponseStatus(res, 400, "Failed to delete data");
+	}
 };
 
 exports.updateCinema = async (req, res) => {
@@ -186,19 +160,12 @@ exports.updateCinema = async (req, res) => {
 	if (initialResult.length > 0) {
 		const results = cinemaModel.updateCinema(id, data);
 		if (results) {
-			return res.json({
-				status: true,
-				message: "data successfully updated",
-				results: {
-					...initialResult[0],
-					...data,
-				},
+			return status.ResponseStatus(res, 200, "data successfully updated", {
+				...initialResult[0],
+				...data,
 			});
 		}
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Failed to update data",
-		});
+		return status.ResponseStatus(res, 400, "Failed to update data");
 	}
 };

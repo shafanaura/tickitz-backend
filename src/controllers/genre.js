@@ -1,22 +1,20 @@
 const genreModel = require("../models/genres");
+const status = require("../helpers/Response");
 const { APP_URL } = process.env;
 
-exports.createGenre = (req, res) => {
+exports.createGenre = async (req, res) => {
 	const data = req.body;
-	genreModel.createGenre(data, (results) => {
-		return res.json({
-			status: true,
-			message: "Genre created successfully",
-			results: {
-				id: results.insertId,
-				...data,
-			},
+	const results = await genreModel.createGenre(data);
+	if (results) {
+		return status.ResponseStatus(res, 200, "Genre created successfully", {
+			id: results.insertId,
+			...data,
 		});
-	});
+	}
 };
 
-exports.listGenres = (req, res) => {
-	const cond = req.query;
+exports.listGenres = async (req, res) => {
+	const cond = { ...req.query };
 	cond.search = cond.search || "";
 	cond.page = Number(cond.page) || 1;
 	cond.limit = Number(cond.limit) || 5;
@@ -25,85 +23,86 @@ exports.listGenres = (req, res) => {
 	cond.sort = cond.sort || "id";
 	cond.order = cond.order || "ASC";
 
-	genreModel.getGenresByCondition(cond, (results) => {
-		return res.json({
-			status: true,
-			message: "List of all genres",
-			results,
-			pageInfo: {
-				totalData: results.length,
-				currentPage: Number(cond.page),
-				nextLink:
-					results.length > 0
-						? `${APP_URL}genres?page=${Number(cond.page) + 1}`
-						: null,
-				prevLink:
-					cond.page > 1
-						? `${APP_URL}genres?page=${Number(cond.page) - 1}`
-						: null,
-			},
-		});
+	const pageInfo = {
+		nextLink: null,
+		prevLink: null,
+		totalData: 0,
+		totalPage: 0,
+		currentPage: 0,
+	};
+
+	const countData = await genreModel.getGenreCountByCondition(cond);
+	pageInfo.totalData = countData[0].totalData;
+	pageInfo.totalPage = Math.ceil(pageInfo.totalData / cond.limit);
+	pageInfo.currentPage = cond.page;
+	const nextQuery = qs.stringify({
+		...req.query,
+		page: cond.page + 1,
 	});
+	const prevQuery = qs.stringify({
+		...req.query,
+		page: cond.page - 1,
+	});
+	pageInfo.nextLink =
+		cond.page < pageInfo.totalPage
+			? APP_URL.concat(`genres?${nextQuery}`)
+			: null;
+	pageInfo.prevLink =
+		cond.page > 1 ? APP_URL.concat(`genres?${prevQuery}`) : null;
+
+	const results = await genreModel.getGenresByCondition(cond);
+	if (results) {
+		return status.ResponseStatus(
+			res,
+			200,
+			"List of all Genres",
+			results,
+			pageInfo,
+		);
+	}
 };
 
-exports.updateGenre = (req, res) => {
+exports.updateGenre = async (req, res) => {
 	const { id } = req.params;
 	const data = req.body;
-	genreModel.getGenreById(id, (initialResult) => {
-		if (initialResult.length > 0) {
-			genreModel.updateGenre(id, data, (results) => {
-				return res.json({
-					status: true,
-					message: "data successfully updated",
-					results: {
-						...initialResult[0],
-						...data,
-					},
-				});
-			});
-		} else {
-			return res.status(400).json({
-				status: false,
-				message: "Failed to update data",
+	const initialResult = await genreModel.getGenreById(id);
+	if (initialResult.length > 0) {
+		const results = await genreModel.updateGenre(id, data);
+		if (results) {
+			return status.ResponseStatus(res, 200, "data successfully updated", {
+				...initialResult[0],
+				...data,
 			});
 		}
-	});
+	} else {
+		return status.ResponseStatus(res, 400, "Failed to update data");
+	}
 };
 
-exports.deleteGenre = (req, res) => {
+exports.deleteGenre = async (req, res) => {
 	const { id } = req.params;
-	genreModel.getGenreById(id, (initialResult) => {
-		if (initialResult.length > 0) {
-			genreModel.deleteGenreById(id, (results) => {
-				return res.json({
-					status: true,
-					message: "Data deleted successfully",
-					results: initialResult[0],
-				});
-			});
-		} else {
-			return res.status(400).json({
-				status: false,
-				message: "Failed to delete data",
-			});
+	const initialResult = await genreModel.getGenreById(id);
+	if (initialResult.length > 0) {
+		const results = await genreModel.deleteGenreById(id);
+		if (results) {
+			return status.ResponseStatus(
+				res,
+				200,
+				"Data deleted successfully",
+				initialResult[0],
+			);
 		}
-	});
+	} else {
+		return status.ResponseStatus(res, 400, "Failed to delete data");
+	}
 };
 
-exports.detailGenre = (req, res) => {
+exports.detailGenre = async (req, res) => {
 	const { id } = req.params;
-	genreModel.getGenreById(id, (results) => {
-		if (results.length > 0) {
-			return res.json({
-				status: true,
-				message: "Details of Genre",
-				results: results[0],
-			});
-		} else {
-			return res.status(400).json({
-				status: false,
-				message: "Genre not exists",
-			});
-		}
-	});
+	const results = await genreModel.getGenreById(id);
+	if (results.length > 0) {
+		return status.ResponseStatus(res, 200, "Details of Genre", results[0]);
+	} else {
+		return status.ResponseStatus(res, 400, "Genre not exists");
+	}
 };

@@ -290,7 +290,7 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `email` varchar(80) NOT NULL,
   `password` varchar(60) NOT NULL,
-  `role` enum('Admin','SuperUser') DEFAULT 'SuperUser',
+  `role` enum('Admin','User') DEFAULT 'User',
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -300,8 +300,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `email`, `password`, `role`, `createdAt`) VALUES
 (9, 'admin@gmail.com', '$2b$10$E0mQIsTTVqQyVyX1/LECped1IFVFKGISa5cJ3feV88olyuDSVZ27S', 'Admin', '2021-01-26 03:06:08'),
-(10, 'user1@gmail.com', '$2b$10$pXLN1W7Zzs5qTAuHt35pHegGQagiCKQ8VpUsE0avO85.u0oA1AlYa', 'SuperUser', '2021-01-26 03:10:47'),
-(11, 'user2@gmail.com', '$2b$10$KlknH76Ei3fZJa9EDbUF9.1ST3p8XHGVU/6I.aQmqzfrcnxbAnHua', 'SuperUser', '2021-01-27 16:08:36');
+(10, 'user1@gmail.com', '$2b$10$pXLN1W7Zzs5qTAuHt35pHegGQagiCKQ8VpUsE0avO85.u0oA1AlYa', 'User', '2021-01-26 03:10:47'),
+(11, 'user2@gmail.com', '$2b$10$KlknH76Ei3fZJa9EDbUF9.1ST3p8XHGVU/6I.aQmqzfrcnxbAnHua', 'User', '2021-01-27 16:08:36');
 
 --
 -- Indexes for dumped tables

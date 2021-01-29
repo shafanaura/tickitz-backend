@@ -6,13 +6,9 @@ exports.createSeat = async (req, res) => {
 	const data = req.body;
 	const results = await seatModel.createSeat(data);
 	if (results) {
-		return res.json({
-			status: true,
-			message: "seat created successfully",
-			results: {
-				id: results.insertId,
-				...data,
-			},
+		return status.ResponseStatus(res, 200, "seat created successfully", {
+			id: results.insertId,
+			...data,
 		});
 	}
 };
@@ -56,12 +52,13 @@ exports.listSeats = async (req, res) => {
 
 	const results = await seatModel.getSeatsByCondition(cond);
 	if (results) {
-		return res.json({
-			status: true,
-			message: "List of all Seats",
+		return status.ResponseStatus(
+			res,
+			200,
+			"List of all Seats",
 			results,
 			pageInfo,
-		});
+		);
 	}
 };
 
@@ -72,20 +69,13 @@ exports.updateSeat = async (req, res) => {
 	if (initialResult.length > 0) {
 		const results = seatModel.updateSeat(id, data);
 		if (results) {
-			return res.json({
-				status: true,
-				message: "data successfully updated",
-				results: {
-					...initialResult[0],
-					...data,
-				},
+			return status.ResponseStatus(res, 200, "data successfully updated", {
+				...initialResult[0],
+				...data,
 			});
 		}
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Failed to update data",
-		});
+		return status.ResponseStatus(res, 400, "Failed to update data");
 	}
 };
 
@@ -95,17 +85,15 @@ exports.deleteSeat = async (req, res) => {
 	if (initialResult.length > 0) {
 		const results = seatModel.deleteSeatById(id);
 		if (results) {
-			return res.json({
-				status: true,
-				message: "Data deleted successfully",
-				results: initialResult[0],
-			});
+			return status.ResponseStatus(
+				res,
+				420,
+				"Data deleted successfully",
+				initialResult[0],
+			);
 		}
 	} else {
-		return res.status(400).json({
-			status: true,
-			message: "Failed to delete data",
-		});
+		return status.ResponseStatus(res, 400, "Failed to delete data");
 	}
 };
 
@@ -113,15 +101,8 @@ exports.detailSeat = async (req, res) => {
 	const { id } = req.params;
 	const results = await seatModel.getSeatById(id);
 	if (results.length > 0) {
-		return res.json({
-			status: true,
-			message: "Details of Seat",
-			results: results[0],
-		});
+		return status.ResponseStatus(res, 200, "Details of Seat", results[0]);
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Seat not exists",
-		});
+		return status.ResponseStatus(res, 400, "Seat not exists");
 	}
 };

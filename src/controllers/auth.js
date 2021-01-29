@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const { APP_KEY } = process.env;
 const jwt = require("jsonwebtoken");
 const Role = require("../utils/userRoles.utils");
+const status = require("../helpers/Response");
 
 exports.login = async (req, res) => {
 	const { email, password } = req.body;
@@ -12,22 +13,14 @@ exports.login = async (req, res) => {
 		if (compare) {
 			const { id } = existingUser[0];
 			const token = jwt.sign({ id }, APP_KEY);
-			return res.json({
-				status: true,
-				message: "Login successfully",
-				token,
-				results: existingUser[0],
-			});
+			return status.ResponseStatus(res, 200, "Login successfully", token);
 		}
 	}
-	return res.status(401).json({
-		status: false,
-		message: "Wrong email or password",
-	});
+	return status.ResponseStatus(res, 401, "Wrong email or password");
 };
 
 exports.register = async (req, res) => {
-	const { email, password, role = Role.SuperUser } = req.body;
+	const { email, password, role = Role.User } = req.body;
 	const isExist = await userModel.getUsersByConditionAsync({ email });
 	if (isExist.length < 1) {
 		const salt = await bcrypt.genSalt();
@@ -38,20 +31,15 @@ exports.register = async (req, res) => {
 			password: encryptedPassword,
 		});
 		if (createUser.insertId > 0) {
-			return res.json({
-				status: true,
-				message: "Register success",
-			});
+			return status.ResponseStatus(res, 200, "Register Success");
 		} else {
-			return res.status(400).json({
-				status: false,
-				message: "Register failed",
-			});
+			return status.ResponseStatus(res, 400, "Register Failed");
 		}
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Register failed, email already exists",
-		});
+		return status.ResponseStatus(
+			res,
+			400,
+			"Register failed, email already exists",
+		);
 	}
 };

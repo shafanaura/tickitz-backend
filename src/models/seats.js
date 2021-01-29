@@ -1,11 +1,12 @@
 const dbConn = require("../helpers/db");
+const table = "seats";
 
 exports.createSeat = (data = {}) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`INSERT INTO seats (${Object.keys(data).join()}) VALUES (${Object.values(
+			`INSERT INTO ${table} (${Object.keys(
 				data,
-			)
+			).join()}) VALUES (${Object.values(data)
 				.map((item) => `"${item}"`)
 				.join(",")})`,
 			(err, res, field) => {
@@ -20,7 +21,7 @@ exports.checkSeats = (data = []) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
-    SELECT * FROM seats
+    SELECT * FROM ${table}
     WHERE id IN (${data.map((item) => item).join()})
     `,
 			(err, res, field) => {
@@ -34,7 +35,7 @@ exports.checkSeats = (data = []) => {
 
 exports.getSeatById = (id) => {
 	return new Promise((resolve, reject) => {
-		dbConn.query(`SELECT * FROM seats WHERE id=${id}`, (err, res, field) => {
+		dbConn.query(`SELECT * FROM ${table} WHERE id=${id}`, (err, res, field) => {
 			if (err) reject(err);
 			resolve(res);
 		});
@@ -46,7 +47,7 @@ exports.getSeatCountByConditionAsync = (cond) => {
 		const query = dbConn.query(
 			`
     SELECT COUNT(name) as totalData FROM
-    seats WHERE name LIKE "%${cond.search}%"
+    ${table} WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order}
     `,
 			(err, res, field) => {
@@ -61,7 +62,7 @@ exports.getSeatCountByConditionAsync = (cond) => {
 exports.getSeatsByCondition = (cond) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`SELECT * FROM seats WHERE name LIKE "%${cond.search}%"
+			`SELECT * FROM ${table} WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order} 
     LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,
 			(err, res, field) => {
@@ -92,7 +93,7 @@ exports.updateSeat = (id, data) => {
 
 exports.deleteSeatById = (id) => {
 	return new Promise((resolve, reject) => {
-		dbConn.query(`DELETE FROM seats WHERE id=${id}`, (err, res, field) => {
+		dbConn.query(`DELETE FROM ${table} WHERE id=${id}`, (err, res, field) => {
 			if (err) reject(err);
 			resolve(res);
 		});

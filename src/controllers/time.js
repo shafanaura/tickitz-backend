@@ -2,19 +2,15 @@ const timeModel = require("../models/times");
 const { APP_URL } = process.env;
 const qs = require("querystring");
 
-exports.createTime = (req, res) => {
+exports.createTime = async (req, res) => {
 	const data = req.body;
-	timeModel.createTime(data, (results) => {
-		console.log(results);
-		return res.json({
-			status: true,
-			message: "time created successfully",
-			results: {
-				id: results.insertId,
-				...data,
-			},
+	const results = await timeModel.createTime(data);
+	if (results) {
+		return status.ResponseStatus(res, 200, "time created successfully", {
+			id: results.insertId,
+			...data,
 		});
-	});
+	}
 };
 
 exports.listTimes = async (req, res) => {
@@ -56,12 +52,13 @@ exports.listTimes = async (req, res) => {
 
 	const results = await timeModel.getTimesByCondition(cond);
 	if (results) {
-		return res.json({
-			status: true,
-			message: "List of all times",
+		return status.ResponseStatus(
+			res,
+			200,
+			"List of all times",
 			results,
 			pageInfo,
-		});
+		);
 	}
 };
 
@@ -72,20 +69,13 @@ exports.updateTime = async (req, res) => {
 	if (initialResult.length > 0) {
 		const results = timeModel.updateTime(id, data);
 		if (results) {
-			return res.json({
-				status: true,
-				message: "data successfully updated",
-				results: {
-					...initialResult[0],
-					...data,
-				},
+			return status.ResponseStatus(res, 200, "data successfully updated", {
+				...initialResult[0],
+				...data,
 			});
 		}
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Failed to update data",
-		});
+		return status.ResponseStatus(res, 400, "Failed to update data");
 	}
 };
 
@@ -95,17 +85,15 @@ exports.deleteTime = async (req, res) => {
 	if (initialResult.length > 0) {
 		const results = timeModel.deleteTimeById(id);
 		if (results) {
-			return res.json({
-				status: true,
-				message: "Data deleted successfully",
-				results: initialResult[0],
-			});
+			return status.ResponseStatus(
+				res,
+				200,
+				"Data deleted successfully",
+				initialResult[0],
+			);
 		}
 	} else {
-		return res.status(400).json({
-			status: true,
-			message: "Failed to delete data",
-		});
+		return status.ResponseStatus(res, 400, "Failed to delete data");
 	}
 };
 
@@ -113,15 +101,8 @@ exports.detailTime = async (req, res) => {
 	const { id } = req.params;
 	const results = await timeModel.getTimeById(id);
 	if (results.length > 0) {
-		return res.json({
-			status: true,
-			message: "Details of time",
-			results,
-		});
+		return status.ResponseStatus(res, 200, "Details of time", results);
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "time not exists",
-		});
+		return status.ResponseStatus(res, 400, "time not exists");
 	}
 };

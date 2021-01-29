@@ -11,43 +11,28 @@ exports.createOrder = async (req, res) => {
 	const selectedSeat = [];
 	const resultsGetMovie = await movieModel.getMovieByIdWithGenre(data.idMovie);
 	if (resultsGetMovie.length < 1) {
-		return res.status(400).json({
-			status: false,
-			message: "Movie not exist",
-		});
+		return status.ResponseStatus(res, 400, "Movie not exists");
 	}
 	const resultsGetCinema = await cinemaModel.getCinemaByIdWithTimeAsync(
 		data.idCinema,
 	);
 	if (resultsGetCinema.length < 1) {
-		return res.status(400).json({
-			status: false,
-			message: "Cinema not exist",
-		});
+		return status.ResponseStatus(res, 400, "Cinema not exists");
 	}
 	const resultsGetTime = await timeModel.getTimeById(data.idTime);
 	if (resultsGetTime.length < 1) {
-		return res.status(400).json({
-			status: false,
-			message: "Time not exist",
-		});
+		return status.ResponseStatus(res, 400, "Time not exists");
 	}
 	const resultsGetLocation = await locationModel.getLocationById(
 		data.idLocation,
 	);
 	if (resultsGetLocation.length < 1) {
-		return res.status(400).json({
-			status: false,
-			message: "Location not exist",
-		});
+		return status.ResponseStatus(res, 400, "Location not exists");
 	}
 	if (typeof data.idSeat === "object") {
 		const results = await seatModel.checkSeats(data.idSeat);
 		if (results.length !== data.idSeat.length) {
-			return res.status(400).json({
-				status: false,
-				message: "Some Seat are unavailable",
-			});
+			return status.ResponseStatus(res, 400, "Some seat not exists");
 		} else {
 			results.forEach((item) => {
 				selectedSeat.push(item.id);
@@ -56,10 +41,7 @@ exports.createOrder = async (req, res) => {
 	} else if (typeof data.idSeat === "string") {
 		const results = await seatModel.checkSeats([data.idSeat]);
 		if (results.length !== data.idSeat.length) {
-			return res.status(400).json({
-				status: false,
-				message: "Some Seat are unavailable",
-			});
+			return status.ResponseStatus(res, 400, "Some seat not exists");
 		} else {
 			results.forEach((item) => {
 				selectedSeat.push(item.id);
@@ -86,26 +68,19 @@ exports.createOrder = async (req, res) => {
 			initialResult.insertId,
 		);
 		if (resultsData.length > 0) {
-			return res.json({
-				status: true,
-				message: "Order successfully created",
-				results: {
-					id: resultsData[0].id,
-					user: resultsData[0].userName,
-					movie: resultsData[0].title,
-					cinema: resultsData[0].cinemaName,
-					time: resultsData[0].timeName,
-					location: resultsData[0].locationName,
-					date: resultsData[0].dateTime,
-					price: resultsData[0].price * data.idSeat.length,
-					seats: resultsData.map((item) => item.seatName),
-				},
+			return status.ResponseStatus(res, 200, "Order successfully created", {
+				id: resultsData[0].id,
+				user: resultsData[0].userName,
+				movie: resultsData[0].title,
+				cinema: resultsData[0].cinemaName,
+				time: resultsData[0].timeName,
+				location: resultsData[0].locationName,
+				date: resultsData[0].dateTime,
+				price: resultsData[0].price * data.idSeat.length,
+				seats: resultsData.map((item) => item.seatName),
 			});
 		} else {
-			return res.status(400).json({
-				status: false,
-				message: "Failed to create order",
-			});
+			return status.ResponseStatus(res, 400, "Failed to create order");
 		}
 	}
 };

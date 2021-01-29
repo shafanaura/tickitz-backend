@@ -1,9 +1,10 @@
 const dbConn = require("../helpers/db");
+const table = "transactions";
 
 exports.createOrder = (data = {}) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`INSERT INTO transactions (${Object.keys(
+			`INSERT INTO ${table} (${Object.keys(
 				data,
 			).join()}) VALUES (${Object.values(data)
 				.map((item) => `"${item}"`)
@@ -23,7 +24,7 @@ exports.getTransactionByIdWithSeat = (id) => {
 			SELECT users.email as userName, movies.title, cinemas.name as cinemaName, 
 			times.name as timeName, locations.name as locationName, ts.dateTime, 
 			seats.name as seatName, cinemas.price
-			FROM transactions ts 
+			FROM ${table} ts 
 			INNER JOIN users ON ts.idUser = users.id 
 			INNER JOIN movies ON ts.idMovie = movies.id  
 			INNER JOIN cinemas ON ts.idCinema = cinemas.id  

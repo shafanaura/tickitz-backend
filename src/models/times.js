@@ -1,37 +1,39 @@
 const dbConn = require("../helpers/db");
+const table = "times";
 
-exports.createTime = (data = {}, cb) => {
-	const query = dbConn.query(
-		`INSERT INTO times (${Object.keys(data).join()}) VALUES (${Object.values(
-			data,
-		)
-			.map((item) => `"${item}"`)
-			.join(",")})`,
-		(err, res, field) => {
-			if (err) throw err;
-			cb(res);
-		},
-	);
-	console.log(query.sql);
-};
-
-exports.checkTimes = (data = [], cb) => {
-	const query = dbConn.query(
-		`SELECT * FROM times WHERE id IN (${data.map((item) => item).join()})`,
-		(err, res, field) => {
-			if (err) throw err;
-			console.log(field);
-			cb(res);
-		},
-	);
-	console.log(query.sql);
-};
-
-exports.checkTimesAsync = (data = [], cb) => {
+exports.createTime = (data = {}) => {
 	return new Promise((resolve, reject) => {
-		const query = dbConn.query(
+		dbConn.query(
+			`INSERT INTO ${table} (${Object.keys(
+				data,
+			).join()}) VALUES (${Object.values(data)
+				.map((item) => `"${item}"`)
+				.join(",")})`,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
+};
+
+exports.checkTimes = (data = []) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
+			`SELECT * FROM ${table} WHERE id IN (${data.map((item) => item).join()})`,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
+};
+
+exports.checkTimesAsync = (data = []) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
 			`
-    SELECT * FROM times
+    SELECT * FROM ${table}
     WHERE id IN (${data.map((item) => item).join()})
     `,
 			(err, res, field) => {
@@ -39,12 +41,11 @@ exports.checkTimesAsync = (data = [], cb) => {
 				resolve(res);
 			},
 		);
-		console.log(query.sql);
 	});
 };
 exports.getTimeById = (id) => {
 	return new Promise((resolve, reject) => {
-		dbConn.query(`SELECT * FROM times WHERE id=${id}`, (err, res, field) => {
+		dbConn.query(`SELECT * FROM ${table} WHERE id=${id}`, (err, res, field) => {
 			if (err) reject(err);
 			resolve(res);
 		});
@@ -54,7 +55,7 @@ exports.getTimeById = (id) => {
 exports.getTimesByCondition = (cond) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`SELECT * FROM times WHERE name LIKE "%${cond.search}%"
+			`SELECT * FROM ${table} WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order} 
     LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,
 			(err, res, field) => {
@@ -71,7 +72,7 @@ exports.updateTime = (id, data) => {
 		const value = Object.values(data);
 		dbConn.query(
 			`
-    UPDATE times
+    UPDATE ${table}
     SET ${key.map((item, index) => `${item}="${value[index]}"`)}
     WHERE id=${id}
   `,
@@ -84,19 +85,19 @@ exports.updateTime = (id, data) => {
 };
 exports.deleteTimeById = (id) => {
 	return new Promise((resolve, reject) => {
-		dbConn.query(`DELETE FROM times WHERE id=${id}`, (err, res, field) => {
-			if (err) throw err;
-			cb(res);
+		dbConn.query(`DELETE FROM ${table} WHERE id=${id}`, (err, res, field) => {
+			if (err) reject(err);
+			resolve(res);
 		});
 	});
 };
 
 exports.getTimesCountByConditionAsync = (cond) => {
 	return new Promise((resolve, reject) => {
-		const query = dbConn.query(
+		dbConn.query(
 			`
     SELECT COUNT(name) as totalData FROM
-    times WHERE name LIKE "%${cond.search}%"
+    ${table} WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order}
     `,
 			(err, res, field) => {
@@ -104,6 +105,5 @@ exports.getTimesCountByConditionAsync = (cond) => {
 				resolve(res);
 			},
 		);
-		console.log(query.sql);
 	});
 };

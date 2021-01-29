@@ -1,9 +1,10 @@
 const dbConn = require("../helpers/db");
+const table = "cinemas";
 
-exports.createCinemasAsync = (data = {}) => {
+exports.createCinemas = (data = {}) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`INSERT INTO cinemas (${Object.keys(
+			`INSERT INTO ${table} (${Object.keys(
 				data,
 			).join()}) VALUES (${Object.values(data)
 				.map((item) => `"${item}"`)
@@ -16,12 +17,12 @@ exports.createCinemasAsync = (data = {}) => {
 	});
 };
 
-exports.getCinemaByIdWithTimeAsync = (id) => {
+exports.getCinemaByIdWithTime = (id) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
 			SELECT c.id, c.name, c.picture, c.address, c.price, t.name as timeName
-			FROM cinemas c 
+			FROM ${table} c 
 			LEFT JOIN cinema_times ct ON c.id = ct.idCinema 
 			LEFT JOIN times t ON t.id = ct.idTime
 			WHERE c.id = ${id}
@@ -35,10 +36,12 @@ exports.getCinemaByIdWithTimeAsync = (id) => {
 	});
 };
 
-exports.deleteCinemaById = (id, cb) => {
-	dbConn.query(`DELETE FROM cinemas WHERE id=${id}`, (err, res, field) => {
-		if (err) throw err;
-		cb(res);
+exports.deleteCinemaById = (id) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(`DELETE FROM ${table} WHERE id=${id}`, (err, res, field) => {
+			if (err) reject(err);
+			resolve(res);
+		});
 	});
 };
 
@@ -46,7 +49,7 @@ exports.getCinemasByCondition = (cond) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
 			`SELECT c.id, c.name, c.picture, c.address, c.price
-			FROM cinemas c
+			FROM ${table} c
 			WHERE c.name LIKE "%${cond.search}%"
 			ORDER BY ${cond.sort} ${cond.order} 
 			LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,
@@ -58,12 +61,12 @@ exports.getCinemasByCondition = (cond) => {
 	});
 };
 
-exports.getCinemasCountByConditionAsync = (cond) => {
+exports.getCinemasCountByCondition = (cond) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
     SELECT COUNT(name) as totalData FROM
-    cinemas WHERE name LIKE "%${cond.search}%"
+    ${table} WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order}
     `,
 			(err, res, field) => {
@@ -81,7 +84,7 @@ exports.updateCinema = (id, data) => {
 		const value = Object.values(data);
 		dbConn.query(
 			`
-    UPDATE cinemas
+    UPDATE ${table}
     SET ${key.map((item, index) => `${item}="${value[index]}"`)}
     WHERE id=${id}
   `,
@@ -93,9 +96,11 @@ exports.updateCinema = (id, data) => {
 	});
 };
 
-exports.getCinemaById = (id, cb) => {
-	dbConn.query(`SELECT * FROM cinemas WHERE id=${id}`, (err, res, field) => {
-		if (err) throw err;
-		cb(res);
+exports.getCinemaById = (id) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(`SELECT * FROM ${table} WHERE id=${id}`, (err, res, field) => {
+			if (err) reject(err);
+			resolve(res);
+		});
 	});
 };

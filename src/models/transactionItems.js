@@ -1,10 +1,11 @@
 const dbConn = require("../helpers/db");
+const table = "transaction_items";
 
 exports.createTransactionItems = (data = {}, cb) => {
 	dbConn.query(
-		`INSERT INTO transaction_items (${Object.keys(
+		`INSERT INTO ${table} (${Object.keys(data).join()}) VALUES (${Object.values(
 			data,
-		).join()}) VALUES (${Object.values(data)
+		)
 			.map((item) => `"${item}"`)
 			.join(",")})`,
 		(err, res, field) => {
@@ -17,7 +18,7 @@ exports.createTransactionItems = (data = {}, cb) => {
 exports.createBulkTransactionItems = async (id, data = []) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`INSERT INTO transaction_items (idTransaction, idSeat) VALUES ${data
+			`INSERT INTO ${table} (idTransaction, idSeat) VALUES ${data
 				.map((idSeat) => `(${id}, ${idSeat})`)
 				.join()}`,
 			(err, res, field) => {

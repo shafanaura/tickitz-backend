@@ -4,6 +4,7 @@ const movieGenreModel = require("../models/movieGenres");
 const multer = require("multer");
 const upload = require("../helpers/upload").single("picture");
 const { APP_URL } = process.env;
+const status = require("../helpers/Response");
 const qs = require("querystring");
 
 exports.createMovie = (req, res) => {
@@ -11,35 +12,23 @@ exports.createMovie = (req, res) => {
 		const data = req.body;
 		const selectedGenre = [];
 		if (err instanceof multer.MulterError) {
-			return res.status(400).json({
-				status: false,
-				message: "Error uploading file",
-			});
+			return status.ResponseStatus(res, 400, "Error uploading file");
 		} else if (err) {
-			return res.status(400).json({
-				status: false,
-				message: "Error uploading file",
-			});
+			return status.ResponseStatus(res, 400, "Error uploading file");
 		}
 		if (typeof data.idGenre === "object") {
-			const results = await genreModel.checkGenresAsync(data.idGenre);
+			const results = await genreModel.checkGenres(data.idGenre);
 			if (results.length !== data.idGenre.length) {
-				return res.status(400).json({
-					status: false,
-					message: "Some genre are unavailable",
-				});
+				return status.ResponseStatus(res, 400, "Some genre are unavailable");
 			} else {
 				results.forEach((item) => {
 					selectedGenre.push(item.id);
 				});
 			}
 		} else if (typeof data.idGenre === "string") {
-			const results = await genreModel.checkGenresAsync([data.idGenre]);
+			const results = await genreModel.checkGenres([data.idGenre]);
 			if (results.length !== data.idGenre.length) {
-				return res.status(400).json({
-					status: false,
-					message: "Some genre are unavailable",
-				});
+				return status.ResponseStatus(res, 400, "Some genre are unavailable");
 			} else {
 				results.forEach((item) => {
 					selectedGenre.push(item.id);
@@ -68,27 +57,20 @@ exports.createMovie = (req, res) => {
 				initialResult.insertId,
 			);
 			if (movies.length > 0) {
-				return res.json({
-					status: true,
-					message: "Movie successfully created",
-					results: {
-						id: movies[0].id,
-						title: movies[0].title,
-						genre: movies[0].genre,
-						picture: movies[0].picture,
-						releaseDate: movies[0].releaseDate,
-						directed: movies[0].directed,
-						duration: movies[0].duration,
-						cast: movies[0].cast,
-						synopsis: movies[0].synopsis,
-						genres: movies.map((item) => item.genreName),
-					},
+				return status.ResponseStatus(res, 200, "Movie successfully created", {
+					id: movies[0].id,
+					title: movies[0].title,
+					genre: movies[0].genre,
+					picture: movies[0].picture,
+					releaseDate: movies[0].releaseDate,
+					directed: movies[0].directed,
+					duration: movies[0].duration,
+					cast: movies[0].cast,
+					synopsis: movies[0].synopsis,
+					genres: movies.map((item) => item.genreName),
 				});
 			} else {
-				return res.status(400).json({
-					status: false,
-					message: "Failed to create movie",
-				});
+				return status.ResponseStatus(res, 400, "Failed to create movie");
 			}
 		}
 	});
@@ -98,26 +80,19 @@ exports.detailMovie = async (req, res) => {
 	const { id } = req.params;
 	const results = await movieModel.getMovieByIdWithGenre(id);
 	if (results.length > 0) {
-		return res.json({
-			status: true,
-			message: "Details of movie",
-			results: {
-				id: results[0].id,
-				title: results[0].title,
-				picture: results[0].picture,
-				releaseDate: results[0].releaseDate,
-				directed: results[0].directed,
-				duration: results[0].duration,
-				cast: results[0].cast,
-				synopsis: results[0].synopsis,
-				genreName: results.map(({ genreName }) => genreName),
-			},
+		return status.ResponseStatus(res, 200, "Details of movie", {
+			id: results[0].id,
+			title: results[0].title,
+			picture: results[0].picture,
+			releaseDate: results[0].releaseDate,
+			directed: results[0].directed,
+			duration: results[0].duration,
+			cast: results[0].cast,
+			synopsis: results[0].synopsis,
+			genreName: results.map(({ genreName }) => genreName),
 		});
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Movie not exists",
-		});
+		return status.ResponseStatus(res, 400, "Movie not exists");
 	}
 };
 
@@ -139,7 +114,7 @@ exports.listMovies = async (req, res) => {
 		currentPage: 0,
 	};
 
-	const countData = await movieModel.getMoviesCountByConditionAsync(cond);
+	const countData = await movieGenreModel.getMoviesCountByCondition(cond);
 	pageInfo.totalData = countData[0].totalData;
 	pageInfo.totalPage = Math.ceil(pageInfo.totalData / cond.limit);
 	pageInfo.currentPage = cond.page;
@@ -160,12 +135,13 @@ exports.listMovies = async (req, res) => {
 
 	const results = await movieModel.getMoviesByCondition(cond);
 	if (results) {
-		return res.json({
-			status: true,
-			message: "List of all movies",
+		return status.ResponseStatus(
+			res,
+			200,
+			"List of all movies",
 			results,
 			pageInfo,
-		});
+		);
 	}
 };
 
@@ -175,17 +151,15 @@ exports.deleteMovie = async (req, res) => {
 	if (initialResult.length > 0) {
 		const results = await movieModel.deleteMovieById(id);
 		if (results) {
-			return res.json({
-				status: true,
-				message: "Data deleted successfully",
-				results: initialResult[0],
-			});
+			return status.ResponseStatus(
+				res,
+				200,
+				"Data deleted successfully",
+				initialResult[0],
+			);
 		}
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Failed to delete data",
-		});
+		return status.ResponseStatus(res, 400, "Failed to delete data");
 	}
 };
 
@@ -196,20 +170,13 @@ exports.updateMovie = async (req, res) => {
 	if (initialResult.length > 0) {
 		const results = await movieModel.updateMovie(id, data);
 		if (results) {
-			return res.json({
-				status: true,
-				message: "data successfully updated",
-				results: {
-					...initialResult[0],
-					...data,
-				},
+			return status.ResponseStatus(res, 200, "data successfully updated", {
+				...initialResult[0],
+				...data,
 			});
 		}
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Failed to update data",
-		});
+		return status.ResponseStatus(res, 400, "Failed to update data");
 	}
 };
 
@@ -220,19 +187,12 @@ exports.updateGenreMovie = async (req, res) => {
 	if (initialResult.length > 0) {
 		const results = await movieModel.updateGenreMovie(id, data);
 		if (results) {
-			return res.json({
-				status: true,
-				message: "data successfully updated",
-				results: {
-					...initialResult[0],
-					...data,
-				},
+			return status.ResponseStatus(res, 400, "data successfully updated", {
+				...initialResult[0],
+				...data,
 			});
 		}
 	} else {
-		return res.status(400).json({
-			status: false,
-			message: "Failed to update data",
-		});
+		return status.ResponseStatus(res, 400, "Failed to update data");
 	}
 };
