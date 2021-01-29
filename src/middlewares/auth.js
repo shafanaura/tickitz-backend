@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { APP_KEY } = process.env;
 const userModel = require("../models/users");
+const status = require("../helpers/Response");
 
 exports.authCheck = (req, res, next) => {
 	const { authorization } = req.headers;
@@ -12,10 +13,7 @@ exports.authCheck = (req, res, next) => {
 			return next();
 		}
 	}
-	return res.status(401).json({
-		status: false,
-		message: "Authorization needed",
-	});
+	return status.ResponseStatus(res, 401, "Authorization needed");
 };
 
 exports.authRole = (roles) => {
@@ -27,10 +25,7 @@ exports.authRole = (roles) => {
 		if (userRole[0].role === roles) {
 			return next();
 		} else {
-			return res.status(403).json({
-				status: false,
-				message: "You don't have permission",
-			});
+			return status.ResponseStatus(res, 403, "You don't have permission");
 		}
 	};
 };
