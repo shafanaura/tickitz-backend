@@ -3,7 +3,6 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const HttpException = require("./src/helpers/HttpException");
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const status = require("./src/helpers/Response");
 

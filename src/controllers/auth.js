@@ -4,10 +4,12 @@ const { APP_KEY } = process.env;
 const jwt = require("jsonwebtoken");
 const Role = require("../utils/userRoles.utils");
 const status = require("../helpers/Response");
+const { validationResult } = require("express-validator");
 
 exports.login = async (req, res) => {
 	const { email, password } = req.body;
-	const existingUser = await userModel.getUsersByConditionAsync({ email });
+	const existingUser = await userModel.getUsersByCondition({ email });
+	this.checkValidation(req, res);
 	if (existingUser.length > 0) {
 		const compare = await bcrypt.compare(password, existingUser[0].password);
 		if (compare) {
@@ -21,25 +23,24 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
 	const { email, password, role = Role.User } = req.body;
-	const isExist = await userModel.getUsersByConditionAsync({ email });
-	if (isExist.length < 1) {
-		const salt = await bcrypt.genSalt();
-		const encryptedPassword = await bcrypt.hash(password, salt);
-		const createUser = await userModel.createUser({
-			email,
-			role,
-			password: encryptedPassword,
-		});
-		if (createUser.insertId > 0) {
-			return status.ResponseStatus(res, 200, "Register Success");
-		} else {
-			return status.ResponseStatus(res, 400, "Register Failed");
-		}
+	this.checkValidation(req, res);
+	const salt = await bcrypt.genSalt();
+	const encryptedPassword = await bcrypt.hash(password, salt);
+	const createUser = await userModel.createUser({
+		email,
+		role,
+		password: encryptedPassword,
+	});
+	if (createUser.insertId > 0) {
+		return status.ResponseStatus(res, 200, "Register Success");
 	} else {
-		return status.ResponseStatus(
-			res,
-			400,
-			"Register failed, email already exists",
-		);
+		return status.ResponseStatus(res, 400, "Register Failed");
+	}
+};
+
+exports.checkValidation = (req, res) => {
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return status.ResponseStatus(res, 400, "Validation Failed", errors);
 	}
 };

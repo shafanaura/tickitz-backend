@@ -1,7 +1,7 @@
 const dbConn = require("../helpers/db");
 const table = "users";
 
-exports.getUsersByIdAsync = (id) => {
+exports.getUsersById = (id) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`SELECT * FROM ${table} WHERE id=${id}`,
@@ -14,7 +14,7 @@ exports.getUsersByIdAsync = (id) => {
 	});
 };
 
-exports.getUsersByConditionAsync = (cond) => {
+exports.getUsersByCondition = (cond) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`SELECT * FROM ${table} WHERE ${Object.keys(cond)
