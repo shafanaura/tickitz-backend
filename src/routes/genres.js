@@ -1,6 +1,5 @@
 const routes = require("express").Router();
 const genreController = require("../controllers/genre");
-const validator = require("../middlewares/validator");
 const authMiddleware = require("../middlewares/auth");
 const Role = require("../utils/userRoles.utils");
 
@@ -38,7 +37,5 @@ routes
 		authMiddleware.authRole(Role.Admin),
 		genreController.createGenre,
 	);
-// 	.get(genreController.readDb);
-// routes.get("/genres/:name", genreController.show);
 
 module.exports = routes;

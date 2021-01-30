@@ -1,5 +1,5 @@
 const dbConn = require("../helpers/db");
-const table = "cinemas";
+const table = "users";
 
 exports.getUsersByIdAsync = (id) => {
 	return new Promise((resolve, reject) => {

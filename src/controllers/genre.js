@@ -1,6 +1,7 @@
 const genreModel = require("../models/genres");
 const status = require("../helpers/Response");
 const { APP_URL } = process.env;
+const qs = require("querystring");
 
 exports.createGenre = async (req, res) => {
 	const data = req.body;

@@ -5,6 +5,7 @@ const cinemaModel = require("../models/cinemas");
 const timeModel = require("../models/times");
 const locationModel = require("../models/locations");
 const seatModel = require("../models/seats");
+const status = require("../helpers/Response");
 
 exports.createOrder = async (req, res) => {
 	const data = req.body;

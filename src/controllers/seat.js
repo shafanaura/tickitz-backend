@@ -1,6 +1,7 @@
 const seatModel = require("../models/seats");
 const { APP_URL } = process.env;
 const qs = require("querystring");
+const status = require("../helpers/Response");
 
 exports.createSeat = async (req, res) => {
 	const data = req.body;

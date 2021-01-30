@@ -114,7 +114,7 @@ exports.listMovies = async (req, res) => {
 		currentPage: 0,
 	};
 
-	const countData = await movieGenreModel.getMoviesCountByCondition(cond);
+	const countData = await movieModel.getMoviesCountByCondition(cond);
 	pageInfo.totalData = countData[0].totalData;
 	pageInfo.totalPage = Math.ceil(pageInfo.totalData / cond.limit);
 	pageInfo.currentPage = cond.page;

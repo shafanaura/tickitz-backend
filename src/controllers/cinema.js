@@ -71,7 +71,7 @@ exports.createCinema = (req, res) => {
 
 exports.detailCinema = async (req, res) => {
 	const { id } = req.params;
-	const results = await cinemaModel.getCinemaByIdWithTimeAsync(id);
+	const results = await cinemaModel.getCinemaByIdWithTime(id);
 	if (results.length > 0) {
 		return status.ResponseStatus(res, 200, "Details of cinema", {
 			id: results[0].id,
@@ -104,7 +104,7 @@ exports.listCinemas = async (req, res) => {
 		currentPage: 0,
 	};
 
-	const countData = await cinemaModel.getCinemasCountByConditionAsync(cond);
+	const countData = await cinemaModel.getCinemasCountByCondition(cond);
 	pageInfo.totalData = countData[0].totalData;
 	pageInfo.totalPage = Math.ceil(pageInfo.totalData / cond.limit);
 	pageInfo.currentPage = cond.page;
@@ -156,7 +156,7 @@ exports.deleteCinema = async (req, res) => {
 exports.updateCinema = async (req, res) => {
 	const { id } = req.params;
 	const data = req.body;
-	const initialResult = await cinemaModel.getCinemaByIdWithTimeAsync(id);
+	const initialResult = await cinemaModel.getCinemaByIdWithTime(id);
 	if (initialResult.length > 0) {
 		const results = cinemaModel.updateCinema(id, data);
 		if (results) {
