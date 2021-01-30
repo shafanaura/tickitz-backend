@@ -5,6 +5,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const HttpException = require("./src/helpers/HttpException");
 const errorMiddleware = require("./src/middlewares/error.middleware");
+const status = require("./src/helpers/Response");
 
 dotenv.config();
 const { APP_PORT } = process.env;
@@ -35,9 +36,8 @@ app.use(
 	require("./src/routes/seats"),
 );
 
-app.all("*", (req, res, next) => {
-	const err = new HttpException(404, "Endpoint Not Found");
-	next(err);
+app.all("*", (req, res) => {
+	return status.ResponseStatus(res, 404, "Endpoint Not Found");
 });
 
 // Error middleware
