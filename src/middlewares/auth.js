@@ -19,7 +19,7 @@ exports.authCheck = (req, res, next) => {
 exports.authRole = (roles) => {
 	return async (req, res, next) => {
 		const data = req.userData;
-		const userRole = await userModel.getUsersByConditionAsync({
+		const userRole = await userModel.getUsersByCondition({
 			id: data.id,
 		});
 		if (userRole[0].role === roles) {

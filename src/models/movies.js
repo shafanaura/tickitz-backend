@@ -21,7 +21,7 @@ exports.getMovieByIdWithGenre = (id) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
-			SELECT m.id, m.title, m.releaseDate, m.directed, m.duration, m.cast, m.synopsis, g.name as genreName
+			SELECT m.id, m.title, m.picture, m.releaseDate, m.directed, m.duration, m.cast, m.synopsis, g.name as genreName
 			FROM ${table} m 
 			INNER JOIN movie_genres mg ON m.id = mg.idMovie 
 			INNER JOIN genres g ON g.id = mg.idGenre
@@ -65,7 +65,7 @@ exports.deleteMovieById = (id) => {
 exports.getMoviesByCondition = (cond) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
-			`SELECT m.id, m.title FROM ${table} m
+			`SELECT * FROM ${table} m
 			WHERE m.title LIKE "%${cond.search}%"
 			ORDER BY ${cond.sort} ${cond.order} 
 			LIMIT ${cond.dataLimit} OFFSET ${cond.offset}`,

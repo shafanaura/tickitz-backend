@@ -15,7 +15,12 @@ exports.login = async (req, res) => {
 		if (compare) {
 			const { id } = existingUser[0];
 			const token = jwt.sign({ id }, APP_KEY);
-			return status.ResponseStatus(res, 200, "Login successfully", token);
+			// return status.ResponseStatus(res, 200, "Login successfully", { token });
+			return res.json({
+				status: true,
+				message: "Login successfully",
+				token,
+			});
 		}
 	}
 	return status.ResponseStatus(res, 401, "Wrong email or password");

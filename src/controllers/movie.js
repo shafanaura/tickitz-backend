@@ -3,7 +3,7 @@ const genreModel = require("../models/genres");
 const movieGenreModel = require("../models/movieGenres");
 const multer = require("multer");
 const upload = require("../helpers/upload").single("picture");
-const { APP_URL } = process.env;
+const { APP_URL, APP_PORT } = process.env;
 const status = require("../helpers/Response");
 const qs = require("querystring");
 
@@ -37,7 +37,8 @@ exports.createMovie = (req, res) => {
 		}
 		const movieData = {
 			title: data.title,
-			picture: (req.file && req.file.path) || null,
+			// picture: (req.file && req.file.path) || null,
+			picture: `${APP_URL}${req.file.destination}/${req.file.filename}` || null,
 			releaseDate: data.releaseDate,
 			directed: data.directed,
 			duration: data.duration,
@@ -60,8 +61,8 @@ exports.createMovie = (req, res) => {
 				return status.ResponseStatus(res, 200, "Movie successfully created", {
 					id: movies[0].id,
 					title: movies[0].title,
-					genre: movies[0].genre,
 					picture: movies[0].picture,
+					genre: movies[0].genre,
 					releaseDate: movies[0].releaseDate,
 					directed: movies[0].directed,
 					duration: movies[0].duration,
