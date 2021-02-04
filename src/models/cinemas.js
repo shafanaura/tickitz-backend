@@ -23,7 +23,6 @@ exports.getCinemaByIdWithTime = (id) => {
 			`
 			SELECT c.id, c.name, c.picture, c.address, c.price, t.name as timeName
 			FROM ${table} c 
-			LEFT JOIN cinema_times ct ON c.id = ct.idCinema 
 			LEFT JOIN times t ON t.id = ct.idTime
 			WHERE c.id = ${id}
   		`,
@@ -102,5 +101,20 @@ exports.getCinemaById = (id) => {
 			if (err) reject(err);
 			resolve(res);
 		});
+	});
+};
+
+exports.checkCinema = (data = []) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
+			`
+    SELECT * FROM ${table}
+    WHERE id IN (${data.map((item) => item).join()})
+    `,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
 	});
 };

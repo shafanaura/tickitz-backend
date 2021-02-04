@@ -10,11 +10,11 @@ const status = require("../helpers/Response");
 exports.createOrder = async (req, res) => {
 	const data = req.body;
 	const selectedSeat = [];
-	const resultsGetMovie = await movieModel.getMovieByIdWithGenre(data.idMovie);
+	const resultsGetMovie = await movieModel.getMovieByIdWithItems(data.idMovie);
 	if (resultsGetMovie.length < 1) {
 		return status.ResponseStatus(res, 400, "Movie not exists");
 	}
-	const resultsGetCinema = await cinemaModel.getCinemaByIdWithTimeAsync(
+	const resultsGetCinema = await cinemaModel.getCinemaByIdWithTime(
 		data.idCinema,
 	);
 	if (resultsGetCinema.length < 1) {

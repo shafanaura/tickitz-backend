@@ -33,6 +33,7 @@ app.use(
 	require("./src/routes/orders"),
 	require("./src/routes/locations"),
 	require("./src/routes/seats"),
+	require("./src/routes/showtimes"),
 );
 
 app.all("*", (req, res) => {

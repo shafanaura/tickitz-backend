@@ -1,8 +1,7 @@
 const cinemaModel = require("../models/cinemas");
 const timeModel = require("../models/times");
-const cinemaTimeModel = require("../models/cinemaTimes");
 const multer = require("multer");
-const upload = require("../helpers/upload").single("picture");
+const upload = require("../helpers/uploadCinema").single("picture");
 const qs = require("querystring");
 const status = require("../helpers/Response");
 const { APP_URL } = process.env;
@@ -37,19 +36,13 @@ exports.createCinema = (req, res) => {
 		}
 		const cinemaData = {
 			name: data.name,
-			picture: (req.file && req.file.path) || null,
+			picture: `${APP_URL}${req.file.destination}/${req.file.filename}` || null,
 			address: data.address,
 			price: data.price,
 			// createdBy: req.userData.id,
 		};
 		const initialResult = await cinemaModel.createCinemas(cinemaData);
 		if (initialResult.affectedRows > 0) {
-			if (selectedTime.length > 0) {
-				await cinemaTimeModel.createBulkCinemaTimes(
-					initialResult.insertId,
-					selectedTime,
-				);
-			}
 			const cinemas = await cinemaModel.getCinemaByIdWithTime(
 				initialResult.insertId,
 			);

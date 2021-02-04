@@ -1,8 +1,9 @@
 const movieModel = require("../models/movies");
 const genreModel = require("../models/genres");
+const locationModel = require("../models/locations");
 const movieGenreModel = require("../models/movieGenres");
 const multer = require("multer");
-const upload = require("../helpers/upload").single("picture");
+const upload = require("../helpers/uploadMovie").single("picture");
 const { APP_URL, APP_PORT } = process.env;
 const status = require("../helpers/Response");
 const qs = require("querystring");
@@ -11,11 +12,13 @@ exports.createMovie = (req, res) => {
 	upload(req, res, async (err) => {
 		const data = req.body;
 		const selectedGenre = [];
+		const selectedLocation = [];
 		if (err instanceof multer.MulterError) {
 			return status.ResponseStatus(res, 400, "Error uploading file");
 		} else if (err) {
 			return status.ResponseStatus(res, 400, "Error uploading file");
 		}
+		// create movie to add genre
 		if (typeof data.idGenre === "object") {
 			const results = await genreModel.checkGenres(data.idGenre);
 			if (results.length !== data.idGenre.length) {
@@ -35,9 +38,28 @@ exports.createMovie = (req, res) => {
 				});
 			}
 		}
+		// create movie to add location
+		if (typeof data.idLocation === "object") {
+			const results = await locationModel.checkLocation(data.idLocation);
+			if (results.length !== data.idLocation.length) {
+				return status.ResponseStatus(res, 400, "Some location are unavailable");
+			} else {
+				results.forEach((item) => {
+					selectedLocation.push(item.id);
+				});
+			}
+		} else if (typeof data.idLocation === "string") {
+			const results = await locationModel.checkLocation([data.idLocation]);
+			if (results.length !== data.idLocation.length) {
+				return status.ResponseStatus(res, 400, "Some location are unavailable");
+			} else {
+				results.forEach((item) => {
+					selectedLocation.push(item.id);
+				});
+			}
+		}
 		const movieData = {
 			title: data.title,
-			// picture: (req.file && req.file.path) || null,
 			picture: `${APP_URL}${req.file.destination}/${req.file.filename}` || null,
 			releaseDate: data.releaseDate,
 			directed: data.directed,
@@ -48,13 +70,14 @@ exports.createMovie = (req, res) => {
 		};
 		const initialResult = await movieModel.createMovie(movieData);
 		if (initialResult.affectedRows > 0) {
+			// create movie genre
 			if (selectedGenre.length > 0) {
 				await movieGenreModel.createBulkMovieGenres(
 					initialResult.insertId,
 					selectedGenre,
 				);
 			}
-			const movies = await movieModel.getMovieByIdWithGenre(
+			const movies = await movieModel.getMovieByIdWithItems(
 				initialResult.insertId,
 			);
 			if (movies.length > 0) {
@@ -69,6 +92,7 @@ exports.createMovie = (req, res) => {
 					cast: movies[0].cast,
 					synopsis: movies[0].synopsis,
 					genres: movies.map((item) => item.genreName),
+					locations: movies.map((item) => item.locationName),
 				});
 			} else {
 				return status.ResponseStatus(res, 400, "Failed to create movie");
@@ -79,7 +103,7 @@ exports.createMovie = (req, res) => {
 
 exports.detailMovie = async (req, res) => {
 	const { id } = req.params;
-	const results = await movieModel.getMovieByIdWithGenre(id);
+	const results = await movieModel.getMovieByIdWithItems(id);
 	if (results.length > 0) {
 		return status.ResponseStatus(res, 200, "Details of movie", {
 			id: results[0].id,
@@ -91,6 +115,7 @@ exports.detailMovie = async (req, res) => {
 			cast: results[0].cast,
 			synopsis: results[0].synopsis,
 			genreName: results.map(({ genreName }) => genreName),
+			locationName: results.map(({ locationName }) => locationName),
 		});
 	} else {
 		return status.ResponseStatus(res, 400, "Movie not exists");
@@ -101,7 +126,7 @@ exports.listMovies = async (req, res) => {
 	const cond = { ...req.query };
 	cond.search = cond.search || "";
 	cond.page = Number(cond.page) || 1;
-	cond.limit = Number(cond.limit) || 5;
+	cond.limit = Number(cond.limit) || 10;
 	cond.dataLimit = cond.limit * cond.page;
 	cond.offset = (cond.page - 1) * cond.limit;
 	cond.sort = cond.sort || "id";
@@ -148,7 +173,7 @@ exports.listMovies = async (req, res) => {
 
 exports.deleteMovie = async (req, res) => {
 	const { id } = req.params;
-	const initialResult = await movieModel.getMovieByIdWithGenre(id);
+	const initialResult = await movieModel.getMovieByIdWithItems(id);
 	if (initialResult.length > 0) {
 		const results = await movieModel.deleteMovieById(id);
 		if (results) {
@@ -167,7 +192,7 @@ exports.deleteMovie = async (req, res) => {
 exports.updateMovie = async (req, res) => {
 	const { id } = req.params;
 	const data = req.body;
-	const initialResult = await movieModel.getMovieByIdWithGenre(id);
+	const initialResult = await movieModel.getMovieByIdWithItems(id);
 	if (initialResult.length > 0) {
 		const results = await movieModel.updateMovie(id, data);
 		if (results) {
@@ -184,7 +209,7 @@ exports.updateMovie = async (req, res) => {
 exports.updateGenreMovie = async (req, res) => {
 	const { id } = req.params;
 	const data = req.body;
-	const initialResult = await movieModel.getMovieByIdWithGenre(id);
+	const initialResult = await movieModel.getMovieByIdWithItems(id);
 	if (initialResult.length > 0) {
 		const results = await movieModel.updateGenreMovie(id, data);
 		if (results) {

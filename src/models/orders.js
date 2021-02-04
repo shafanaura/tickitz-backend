@@ -22,16 +22,15 @@ exports.getTransactionByIdWithSeat = (id) => {
 		const query = dbConn.query(
 			`
 			SELECT users.email as userName, movies.title, cinemas.name as cinemaName, 
-			times.name as timeName, locations.name as locationName, ts.dateTime, 
+			times.name as timeName, ts.dateTime, 
 			seats.name as seatName, cinemas.price
 			FROM ${table} ts 
-			INNER JOIN users ON ts.idUser = users.id 
-			INNER JOIN movies ON ts.idMovie = movies.id  
-			INNER JOIN cinemas ON ts.idCinema = cinemas.id  
-			INNER JOIN times ON ts.idTime = times.id  
-			INNER JOIN locations ON ts.idLocation = locations.id
-			INNER JOIN transaction_items ti ON ts.id = ti.idTransaction
-			INNER JOIN seats ON seats.id = ti.idSeat  
+			INNER JOIN users ON users.id = ts.idUser  
+			INNER JOIN movies ON movies.id = ts.idMovie   
+			INNER JOIN cinemas ON cinemas.id = ts.idCinema   
+			INNER JOIN times ON times.id = ts.idTime 
+			INNER JOIN transaction_seat_items ti ON ti.idTransaction = ts.id 
+			INNER JOIN seats ON ti.idSeat = seats.id   
 			WHERE ts.id = ${id}
   		`,
 			(err, res, field) => {

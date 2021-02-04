@@ -17,14 +17,15 @@ exports.createMovie = (data = {}, cb) => {
 	});
 };
 
-exports.getMovieByIdWithGenre = (id) => {
+exports.getMovieByIdWithItems = (id) => {
 	return new Promise((resolve, reject) => {
 		const query = dbConn.query(
 			`
-			SELECT m.id, m.title, m.picture, m.releaseDate, m.directed, m.duration, m.cast, m.synopsis, g.name as genreName
+			SELECT m.id, m.title, m.picture, m.releaseDate, m.directed, m.duration, 
+			m.cast, m.synopsis, g.name as genreName
 			FROM ${table} m 
-			INNER JOIN movie_genres mg ON m.id = mg.idMovie 
-			INNER JOIN genres g ON g.id = mg.idGenre
+			LEFT JOIN movie_genres mg ON m.id = mg.idMovie 
+			LEFT JOIN genres g ON g.id = mg.idGenre
 			WHERE m.id = ${id}
   		`,
 			(err, res, field) => {
@@ -98,6 +99,21 @@ exports.getMovieById = async (id, cb) => {
 		dbConn.query(
 			`
     SELECT * FROM ${table} WHERE id=${id}
+    `,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
+};
+
+exports.checkMovie = (data = []) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
+			`
+    SELECT * FROM ${table}
+    WHERE id IN (${data.map((item) => item).join()})
     `,
 			(err, res, field) => {
 				if (err) reject(err);

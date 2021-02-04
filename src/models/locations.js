@@ -83,3 +83,18 @@ exports.deleteLocationById = (id) => {
 		});
 	});
 };
+
+exports.checkLocation = (data = []) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
+			`
+    SELECT * FROM ${table}
+    WHERE id IN (${data.map((item) => item).join()})
+    `,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
+};

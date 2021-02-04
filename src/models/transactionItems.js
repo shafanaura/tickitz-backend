@@ -1,5 +1,5 @@
 const dbConn = require("../helpers/db");
-const table = "transaction_items";
+const table = "transaction_seat_items";
 
 exports.createTransactionItems = (data = {}, cb) => {
 	dbConn.query(

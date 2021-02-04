@@ -17,7 +17,7 @@ exports.createTime = (data = {}) => {
 	});
 };
 
-exports.checkTimes = (data = []) => {
+exports.checkTime = (data = []) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
 			`SELECT * FROM ${table} WHERE id IN (${data.map((item) => item).join()})`,
@@ -29,20 +29,6 @@ exports.checkTimes = (data = []) => {
 	});
 };
 
-exports.checkTimesAsync = (data = []) => {
-	return new Promise((resolve, reject) => {
-		dbConn.query(
-			`
-    SELECT * FROM ${table}
-    WHERE id IN (${data.map((item) => item).join()})
-    `,
-			(err, res, field) => {
-				if (err) reject(err);
-				resolve(res);
-			},
-		);
-	});
-};
 exports.getTimeById = (id) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(`SELECT * FROM ${table} WHERE id=${id}`, (err, res, field) => {

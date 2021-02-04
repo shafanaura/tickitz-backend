@@ -1,0 +1,48 @@
+2021-02-01: [
+  --------- Spider-man ---------
+  {
+    movie: Spider-man
+    location: Purwokerto
+    cinema: cineone
+    time: 08:30am, 10:00pm, 12:00pm, 02:00pm, 04:00pm, 06:00pm, 08:00pm
+  }, 
+  {
+    movie: Spider-man
+    location: Purwokerto
+    cinema: hiflix
+    time: 08:30am, 10:00pm, 12:00pm, 02:00pm, 04:00pm, 06:00pm
+  },
+  {
+    movie: Spider-man
+    location: Purwokerto
+    cinema: ebv
+    time: 08:30am, 10:00pm, 12:00pm, 02:00pm, 04:00pm
+  }
+
+  --------- Master ---------
+  {
+    movie: Master
+    location: Jakarta
+    cinema: cineone
+    time: 08:30am, 10:00pm, 12:00pm, 02:00pm, 04:00pm, 06:00pm, 08:00pm
+  }, 
+  {
+    movie: Master
+    location: Purwokerto
+    cinema: hiflix
+    time: 08:30am, 10:00pm, 12:00pm, 02:00pm, 04:00pm, 06:00pm
+  }
+]
+
+SELECT * FROM `movie_locations` WHERE idMovie = 190
+
+SELECT idLocation FROM `movie_locations` WHERE idMovie = 190
+
+SELECT * FROM `movies` WHERE month(releaseDate) = 7
+
+SELECT * FROM `showtimes` WHERE day(showTimeDate) = 1
+
+SELECT idCinema, idTime FROM `showtimes` 
+WHERE showTimeDate LIKE "2021-02-02"
+AND idLocation LIKE "7"
+AND idMovie LIKE "189"
