@@ -10,6 +10,8 @@ routes
 		authMiddleware.authRole(Role.Admin),
 		showtimeController.createShowtime,
 	)
-	.get(authMiddleware.authCheck, showtimeController.listShowtime);
+	.get(showtimeController.listShowtime);
+
+routes.route("/showtimes/:id").get(showtimeController.listLocDate);
 
 module.exports = routes;

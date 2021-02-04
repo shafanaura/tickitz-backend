@@ -128,14 +128,74 @@ exports.listShowtime = async (req, res) => {
 	cond.location = cond.location || "";
 	cond.movie = cond.movie || "";
 
-	const results = await showtimeModel.getShowtimeByCondition(cond);
+	// const obj1 = {
+	// 	name: "server1",
+	// 	type: "http",
+	// 	port: "8080",
+	// };
+
+	// const obj2 = {
+	// 	name: "server2",
+	// 	type: "https",
+	// 	port: "8443",
+	// };
+
+	// const obj3 = {
+	// 	name: "server3",
+	// 	type: "http",
+	// 	port: "80",
+	// };
+
+	// // Place objects in an array (as interm step)
+	// const array = [obj1, obj2, obj3];
+
+	const resultGetTimes = await showtimeModel.getShowtimeByCondition(cond);
+	let output = {};
+	resultGetTimes.forEach((item) => {
+		// the item does not exists, we create it.
+		if (!output[item.cinemaName]) {
+			output[item.cinemaName] = {
+				cinema: item.cinemaName,
+				picture: item.cinemaPicture,
+				address: item.cinemaAddress,
+				price: item.cinemaPrice,
+				value: [],
+			};
+		}
+		// in either case, we push the current item in the value.
+		// of the current output key.
+		output[item.cinemaName].value.push(item.timeName);
+	});
+
+	// we are using Object.values() because we do not want the keys
+	// used to generate the output.
+	const results = Object.values(output);
+
+	// const arr = resultGetTimes.reduce((r, item) => {
+	// 	r[item.cinemaName] = r[item.cinemaName] || [];
+	// 	r[item.cinemaName].push(item.timeName);
+	// 	return r;
+	// }, {});
+	// const results = Object.keys(arr).map((key) => ({
+	// 	cinemaName: key,
+	// 	timeName: arr[key],
+	// }));
 	console.log(results);
 	if (results) {
-		return status.ResponseStatus(res, 200, "List of all showtime", {
-			// cinemaName: { timeName: results.map(({ timeName }) => timeName) },
-			cinemaName: results[0].cinemaName,
-			timeName: results[0].timeName,
-			// timeName: results.map(({ timeName }) => timeName),
-		});
+		return status.ResponseStatus(res, 200, "List of all showtime", results);
+	}
+};
+
+exports.listLocDate = async (req, res) => {
+	const { id } = req.params;
+
+	const results = await showtimeModel.getLocDate(id);
+	if (results) {
+		return status.ResponseStatus(
+			res,
+			200,
+			"List of all location and date",
+			results,
+		);
 	}
 };

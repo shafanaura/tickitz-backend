@@ -35,12 +35,28 @@ exports.getShowtimeByCondition = (cond) => {
 	return new Promise((resolve, reject) => {
 		dbConn.query(
 			`
-			SELECT cinemas.name as cinemaName, times.name as timeName FROM ${table}
+			SELECT cinemas.name as cinemaName, cinemas.picture as cinemaPicture, 
+			cinemas.address as cinemaAddress, cinemas.price as cinemaPrice,
+			times.name as timeName FROM ${table}
 			INNER JOIN cinemas ON cinemas.id = ${table}.idCinema
 			INNER JOIN times ON times.id = ${table}.idTime
 			WHERE showTimeDate LIKE "${cond.date}"
 			OR idLocation LIKE "${cond.location}"
 			OR idMovie LIKE "${cond.movie}"
+			`,
+			(err, res, field) => {
+				if (err) reject(err);
+				resolve(res);
+			},
+		);
+	});
+};
+
+exports.getLocDate = (id) => {
+	return new Promise((resolve, reject) => {
+		dbConn.query(
+			`
+			SELECT showTimeDate, idLocation FROM ${table} WHERE idMovie = ${id}
 			`,
 			(err, res, field) => {
 				if (err) reject(err);

@@ -126,7 +126,7 @@ exports.listMovies = async (req, res) => {
 	const cond = { ...req.query };
 	cond.search = cond.search || "";
 	cond.page = Number(cond.page) || 1;
-	cond.limit = Number(cond.limit) || 10;
+	cond.limit = Number(cond.limit) || 5;
 	cond.dataLimit = cond.limit * cond.page;
 	cond.offset = (cond.page - 1) * cond.limit;
 	cond.sort = cond.sort || "id";
