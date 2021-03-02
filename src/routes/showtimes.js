@@ -11,7 +11,4 @@ routes
 		showtimeController.createShowtime,
 	)
 	.get(showtimeController.listShowtime);
-
-routes.route("/showtimes/:id").get(showtimeController.listLocDate);
-
 module.exports = routes;

@@ -128,43 +128,23 @@ exports.listShowtime = async (req, res) => {
 	cond.location = cond.location || "";
 	cond.movie = cond.movie || "";
 
-	// const obj1 = {
-	// 	name: "server1",
-	// 	type: "http",
-	// 	port: "8080",
-	// };
-
-	// const obj2 = {
-	// 	name: "server2",
-	// 	type: "https",
-	// 	port: "8443",
-	// };
-
-	// const obj3 = {
-	// 	name: "server3",
-	// 	type: "http",
-	// 	port: "80",
-	// };
-
-	// // Place objects in an array (as interm step)
-	// const array = [obj1, obj2, obj3];
-
 	const resultGetTimes = await showtimeModel.getShowtimeByCondition(cond);
 	let output = {};
 	resultGetTimes.forEach((item) => {
 		// the item does not exists, we create it.
 		if (!output[item.cinemaName]) {
 			output[item.cinemaName] = {
+				id: item.cinemaId,
 				cinema: item.cinemaName,
 				picture: item.cinemaPicture,
 				address: item.cinemaAddress,
 				price: item.cinemaPrice,
-				value: [],
+				times: [],
 			};
 		}
-		// in either case, we push the current item in the value.
+		// in either case, we push the current item in the times.
 		// of the current output key.
-		output[item.cinemaName].value.push(item.timeName);
+		output[item.cinemaName].times.push(item.timeName);
 	});
 
 	// we are using Object.values() because we do not want the keys
@@ -183,19 +163,5 @@ exports.listShowtime = async (req, res) => {
 	console.log(results);
 	if (results) {
 		return status.ResponseStatus(res, 200, "List of all showtime", results);
-	}
-};
-
-exports.listLocDate = async (req, res) => {
-	const { id } = req.params;
-
-	const results = await showtimeModel.getLocDate(id);
-	if (results) {
-		return status.ResponseStatus(
-			res,
-			200,
-			"List of all location and date",
-			results,
-		);
 	}
 };
