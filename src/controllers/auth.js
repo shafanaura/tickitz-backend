@@ -21,6 +21,7 @@ exports.login = async (req, res) => {
           status: true,
           message: "Login successfully",
           token,
+          userData: existingUser[0],
         });
       } else {
         return status.ResponseStatus(res, 401, "Wrong email or password");

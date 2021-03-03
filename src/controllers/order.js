@@ -52,7 +52,7 @@ exports.createOrder = async (req, res) => {
     console.log(initialResult.insertId);
     if (resultsData.length > 0) {
       return status.ResponseStatus(res, 200, "Order successfully created", {
-        id: resultsData[0].id,
+        // id: resultsData[0].id,
         user: resultsData[0].userName,
         movie: resultsData[0].title,
         cinema: resultsData[0].cinemaName,
