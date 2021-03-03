@@ -10,7 +10,7 @@ const status = require("../helpers/Response");
 exports.createOrder = async (req, res) => {
   const data = req.body;
 
-  const resultsGetMovie = await movieModel.getMovieByIdWithItems(data.idMovie);
+  const resultsGetMovie = await movieModel.getMovieById(data.idMovie);
   if (resultsGetMovie.length < 1) {
     return status.ResponseStatus(res, 400, "Movie not exists");
   }

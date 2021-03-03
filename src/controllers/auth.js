@@ -64,6 +64,23 @@ exports.register = async (req, res) => {
   }
 };
 
+exports.updateUser = async (req, res) => {
+  const { id } = req.params;
+  const data = req.body;
+  const initialResult = await userModel.getUsersById(id);
+  if (initialResult.length > 0) {
+    const results = await userModel.updateUser(id, data);
+    if (results) {
+      return status.ResponseStatus(res, 200, "data successfully updated", {
+        ...initialResult[0],
+        ...data,
+      });
+    }
+  } else {
+    return status.ResponseStatus(res, 400, "Failed to update data");
+  }
+};
+
 exports.checkValidation = (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
