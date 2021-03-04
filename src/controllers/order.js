@@ -9,24 +9,18 @@ const status = require("../helpers/Response");
 
 exports.createOrder = async (req, res) => {
   const data = req.body;
-
   const resultsGetMovie = await movieModel.getMovieById(data.idMovie);
   if (resultsGetMovie.length < 1) {
     return status.ResponseStatus(res, 400, "Movie not exists");
   }
-
-  const resultsGetCinema = await cinemaModel.getCinemaByIdWithTime(
-    data.idCinema
-  );
+  const resultsGetCinema = await cinemaModel.getCinemaById(data.idCinema);
   if (resultsGetCinema.length < 1) {
     return status.ResponseStatus(res, 400, "Cinema not exists");
   }
-
   const resultsGetTime = await timeModel.getTimeById(data.idTime);
   if (resultsGetTime.length < 1) {
     return status.ResponseStatus(res, 400, "Time not exists");
   }
-
   const resultsGetLocation = await locationModel.getLocationById(
     data.idLocation
   );
@@ -40,26 +34,20 @@ exports.createOrder = async (req, res) => {
     idTime: data.idTime,
     idLocation: data.idLocation,
     dateTime: data.dateTime,
-    seatName: data.seatName,
   };
   const initialResult = await orderModel.createOrder(orderData);
-  console.log(initialResult);
   if (initialResult.affectedRows > 0) {
     const resultsData = await orderModel.getTransactionByIdWithSeat(
       initialResult.insertId
     );
-    console.log(resultsData);
-    console.log(initialResult.insertId);
     if (resultsData.length > 0) {
       return status.ResponseStatus(res, 200, "Order successfully created", {
         id: req.userData.id,
         user: resultsData[0].userName,
         movie: resultsData[0].title,
-        cinema: resultsData[0].cinemaName,
         time: resultsData[0].timeName,
         location: resultsData[0].locationName,
         date: resultsData[0].dateTime,
-        seat: resultsData[0].seatName,
         // price: resultsData[0].price * data.idSeat.length,
         // seats: resultsData.map((item) => item.seatName),
       });
