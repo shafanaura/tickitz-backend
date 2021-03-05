@@ -96,10 +96,13 @@ exports.updateCinema = (id, data) => {
 
 exports.getCinemaById = (id) => {
   return new Promise((resolve, reject) => {
-    dbConn.query(`SELECT * FROM ${table} WHERE id=${id}`, (err, res, field) => {
-      if (err) reject(err);
-      resolve(res);
-    });
+    dbConn.query(
+      `SELECT cinemas.price as cinemaPrice FROM cinemas WHERE id=${id}`,
+      (err, res, field) => {
+        if (err) reject(err);
+        resolve(res);
+      }
+    );
   });
 };
 

@@ -7,98 +7,92 @@ const upload = require("../helpers/uploadMovie").single("picture");
 const { APP_URL, APP_PORT } = process.env;
 const status = require("../helpers/Response");
 const qs = require("querystring");
+const fs = require("fs");
 
-exports.createMovie = (req, res) => {
-  upload(req, res, async (err) => {
-    const data = req.body;
-    const selectedGenre = [];
-    const selectedLocation = [];
-    if (err instanceof multer.MulterError) {
-      return status.ResponseStatus(res, 400, "Error uploading file");
-    } else if (err) {
-      return status.ResponseStatus(res, 400, "Error uploading file");
+exports.createMovie = async (req, res) => {
+  const data = req.body;
+  const selectedGenre = [];
+  const selectedLocation = [];
+  // create movie to add genre
+  if (typeof data.idGenre === "object") {
+    const results = await genreModel.checkGenres(data.idGenre);
+    if (results.length !== data.idGenre.length) {
+      return status.ResponseStatus(res, 400, "Some genre are unavailable");
+    } else {
+      results.forEach((item) => {
+        selectedGenre.push(item.id);
+      });
     }
-    // create movie to add genre
-    if (typeof data.idGenre === "object") {
-      const results = await genreModel.checkGenres(data.idGenre);
-      if (results.length !== data.idGenre.length) {
-        return status.ResponseStatus(res, 400, "Some genre are unavailable");
-      } else {
-        results.forEach((item) => {
-          selectedGenre.push(item.id);
-        });
-      }
-    } else if (typeof data.idGenre === "string") {
-      const results = await genreModel.checkGenres([data.idGenre]);
-      if (results.length !== data.idGenre.length) {
-        return status.ResponseStatus(res, 400, "Some genre are unavailable");
-      } else {
-        results.forEach((item) => {
-          selectedGenre.push(item.id);
-        });
-      }
+  } else if (typeof data.idGenre === "string") {
+    const results = await genreModel.checkGenres([data.idGenre]);
+    if (results.length !== data.idGenre.length) {
+      return status.ResponseStatus(res, 400, "Some genre are unavailable");
+    } else {
+      results.forEach((item) => {
+        selectedGenre.push(item.id);
+      });
     }
-    // create movie to add location
-    if (typeof data.idLocation === "object") {
-      const results = await locationModel.checkLocation(data.idLocation);
-      if (results.length !== data.idLocation.length) {
-        return status.ResponseStatus(res, 400, "Some location are unavailable");
-      } else {
-        results.forEach((item) => {
-          selectedLocation.push(item.id);
-        });
-      }
-    } else if (typeof data.idLocation === "string") {
-      const results = await locationModel.checkLocation([data.idLocation]);
-      if (results.length !== data.idLocation.length) {
-        return status.ResponseStatus(res, 400, "Some location are unavailable");
-      } else {
-        results.forEach((item) => {
-          selectedLocation.push(item.id);
-        });
-      }
+  }
+  // create movie to add location
+  if (typeof data.idLocation === "object") {
+    const results = await locationModel.checkLocation(data.idLocation);
+    if (results.length !== data.idLocation.length) {
+      return status.ResponseStatus(res, 400, "Some location are unavailable");
+    } else {
+      results.forEach((item) => {
+        selectedLocation.push(item.id);
+      });
     }
-    const movieData = {
-      title: data.title,
-      picture: `${APP_URL}${req.file.destination}/${req.file.filename}` || null,
-      releaseDate: data.releaseDate,
-      directed: data.directed,
-      duration: data.duration,
-      cast: data.cast,
-      synopsis: data.synopsis,
-      createdBy: req.userData.id,
-    };
-    const initialResult = await movieModel.createMovie(movieData);
-    if (initialResult.affectedRows > 0) {
-      // create movie genre
-      if (selectedGenre.length > 0) {
-        await movieGenreModel.createBulkMovieGenres(
-          initialResult.insertId,
-          selectedGenre
-        );
-      }
-      const movies = await movieModel.getMovieByIdWithItems(
-        initialResult.insertId
+  } else if (typeof data.idLocation === "string") {
+    const results = await locationModel.checkLocation([data.idLocation]);
+    if (results.length !== data.idLocation.length) {
+      return status.ResponseStatus(res, 400, "Some location are unavailable");
+    } else {
+      results.forEach((item) => {
+        selectedLocation.push(item.id);
+      });
+    }
+  }
+  const movieData = {
+    title: data.title,
+    picture: `${APP_URL}${req.file.destination}/${req.file.filename}` || null,
+    releaseDate: data.releaseDate,
+    directed: data.directed,
+    duration: data.duration,
+    cast: data.cast,
+    synopsis: data.synopsis,
+    createdBy: req.userData.id,
+  };
+  const initialResult = await movieModel.createMovie(movieData);
+  if (initialResult.affectedRows > 0) {
+    // create movie genre
+    if (selectedGenre.length > 0) {
+      await movieGenreModel.createBulkMovieGenres(
+        initialResult.insertId,
+        selectedGenre
       );
-      if (movies.length > 0) {
-        return status.ResponseStatus(res, 200, "Movie successfully created", {
-          id: movies[0].id,
-          title: movies[0].title,
-          picture: movies[0].picture,
-          genre: movies[0].genre,
-          releaseDate: movies[0].releaseDate,
-          directed: movies[0].directed,
-          duration: movies[0].duration,
-          cast: movies[0].cast,
-          synopsis: movies[0].synopsis,
-          genres: movies.map((item) => item.genreName),
-          locations: movies.map((item) => item.locationName),
-        });
-      } else {
-        return status.ResponseStatus(res, 400, "Failed to create movie");
-      }
     }
-  });
+    const movies = await movieModel.getMovieByIdWithItems(
+      initialResult.insertId
+    );
+    if (movies.length > 0) {
+      return status.ResponseStatus(res, 200, "Movie successfully created", {
+        id: movies[0].id,
+        title: movies[0].title,
+        picture: movies[0].picture,
+        genre: movies[0].genre,
+        releaseDate: movies[0].releaseDate,
+        directed: movies[0].directed,
+        duration: movies[0].duration,
+        cast: movies[0].cast,
+        synopsis: movies[0].synopsis,
+        genres: movies.map((item) => item.genreName),
+        locations: movies.map((item) => item.locationName),
+      });
+    } else {
+      return status.ResponseStatus(res, 400, "Failed to create movie");
+    }
+  }
 };
 
 exports.detailMovie = async (req, res) => {
@@ -190,19 +184,37 @@ exports.deleteMovie = async (req, res) => {
 };
 
 exports.updateMovie = async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
-  const initialResult = await movieModel.getMovieByIdWithItems(id);
-  if (initialResult.length > 0) {
-    const results = await movieModel.updateMovie(id, data);
-    if (results) {
+  try {
+    const { id } = req.params;
+    const { ...data } = req.body;
+    const initialResult = await movieModel.getMovieByIdWithItems(id);
+    if (initialResult.length < 1) {
+      return status.ResponseStatus(res, 404, "Movie not found");
+    }
+
+    if (req.file) {
+      const picture = `${APP_URL}${req.file.destination}/${req.file.filename}`;
+      const uploadImage = await movieModel.updateMovie(id, { picture });
+      if (uploadImage.affectedRows > 0) {
+        if (initialResult[0].picture !== null) {
+          fs.unlinkSync(`uploads/movie/${initialResult[0].picture}`);
+        }
+        return status.ResponseStatus(res, 200, "Image hash been Updated");
+      }
+      return status.ResponseStatus(res, 400, "Can't update Image");
+    }
+
+    const finalResult = await movieModel.updateMovie(id, data);
+    if (finalResult.affectedRows > 0) {
       return status.ResponseStatus(res, 200, "data successfully updated", {
         ...initialResult[0],
         ...data,
       });
     }
-  } else {
     return status.ResponseStatus(res, 400, "Failed to update data");
+  } catch (err) {
+    console.log(err);
+    return status.ResponseStatus(res, 400, "Bad Request");
   }
 };
 

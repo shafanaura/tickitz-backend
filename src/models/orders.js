@@ -23,7 +23,8 @@ exports.getTransactionByIdWithSeat = (id) => {
       `
 			SELECT users.email as userName, 
       movies.title, times.name as timeName,
-      cinemas.name as cinemaName, ts.dateTime,
+      cinemas.name as cinemaName, cinemas.price as cinemaPrice,
+      ts.dateTime, ts.price,
       locations.name as locationName, ts.seatName
 			FROM ${table} ts 
 			INNER JOIN users ON users.id = ts.idUser  
