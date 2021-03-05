@@ -59,3 +59,11 @@ exports.createOrder = async (req, res) => {
     }
   }
 };
+
+exports.listOrder = async (req, res) => {
+  const { id } = req.params;
+  const results = await orderModel.getTransactionByUserId(id);
+  if (results) {
+    return status.ResponseStatus(res, 200, "List of all Order", results);
+  }
+};
