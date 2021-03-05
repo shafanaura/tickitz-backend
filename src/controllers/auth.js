@@ -6,6 +6,7 @@ const Role = require("../utils/userRoles.utils");
 const status = require("../helpers/Response");
 const { APP_URL } = process.env;
 const { validationResult } = require("express-validator");
+const fs = require("fs");
 
 exports.login = async (req, res) => {
   try {
@@ -122,5 +123,15 @@ exports.checkValidation = (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return status.ResponseStatus(res, 400, "Validation Failed", errors);
+  }
+};
+
+exports.getUser = async (req, res) => {
+  const { id } = req.params;
+  const results = await userModel.getUsersById(id);
+  if (results.length > 0) {
+    return status.ResponseStatus(res, 200, "List Detail user", results[0]);
+  } else {
+    return status.ResponseStatus(res, 400, "User not found");
   }
 };

@@ -197,7 +197,7 @@ exports.updateMovie = async (req, res) => {
       const uploadImage = await movieModel.updateMovie(id, { picture });
       if (uploadImage.affectedRows > 0) {
         if (initialResult[0].picture !== null) {
-          fs.unlinkSync(`uploads/movie/${initialResult[0].picture}`);
+          fs.unlinkSync(`${initialResult[0].picture}`);
         }
         return status.ResponseStatus(res, 200, "Image hash been Updated");
       }
