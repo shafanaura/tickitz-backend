@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const Role = require("../utils/userRoles.utils");
 const status = require("../helpers/Response");
 const { validationResult } = require("express-validator");
+const fs = require("fs");
 
 exports.login = async (req, res) => {
   try {
@@ -61,6 +62,48 @@ exports.register = async (req, res) => {
     }
   } catch (error) {
     return status.ResponseStatus(res, 400, "Bad request");
+  }
+};
+
+exports.UpdateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ...data } = req.body;
+    const initialResults = await userModel.getUsersById(id);
+    if (initialResults.length < 1) {
+      return status.ResponseStatus(res, 404, "User not found");
+    }
+    // image
+    if (req.file) {
+      // const updatePicture = await userModel.updateUser(id, {picture: req.file.path})
+      const picture = req.file.filename;
+      const uploadImage = await userModel.updateUser(id, { picture });
+      if (uploadImage.affectedRows > 0) {
+        if (initialResults[0].picture !== null) {
+          fs.unlinkSync(`uploads/profile/${initialResults[0].picture}`);
+        }
+        return status.ResponseStatus(res, 200, "Image hash been Updated");
+      }
+      return status.ResponseStatus(res, 400, "Cant update image");
+    }
+
+    // info
+    const finalResult = await userModel.updateUser(id, data);
+    if (finalResult.affectedRows > 0) {
+      return status.ResponseStatus(
+        res,
+        200,
+        "Personal Information has been updated",
+        {
+          ...initialResults[0],
+          ...data,
+        }
+      );
+    }
+    return status.ResponseStatus(res, 400, "Cant Update personal Information");
+  } catch (err) {
+    console.log(err);
+    return status.ResponseStatus(res, 400, "Bad Request");
   }
 };
 
