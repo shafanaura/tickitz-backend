@@ -27,7 +27,6 @@ exports.createOrder = async (req, res) => {
   if (resultsGetLocation.length < 1) {
     return status.ResponseStatus(res, 400, "Location not exists");
   }
-  const sendCinemaPrice = await cinemaModel.getCinemaById(data.idCinema);
   const orderData = {
     idUser: req.userData.id,
     idMovie: data.idMovie,
@@ -36,7 +35,7 @@ exports.createOrder = async (req, res) => {
     idLocation: data.idLocation,
     dateTime: data.dateTime,
     seatName: data.seatName,
-    price: data.seatName.length * sendCinemaPrice[0].cinemaPrice,
+    price: data.price,
   };
   const initialResult = await orderModel.createOrder(orderData);
   if (initialResult.affectedRows > 0) {
@@ -52,7 +51,7 @@ exports.createOrder = async (req, res) => {
         location: resultsData[0].locationName,
         date: resultsData[0].dateTime,
         price: resultsData[0].price,
-        seats: resultsData.map((item) => item.seatName),
+        seats: resultsData[0].seatName.split(","),
       });
     } else {
       return status.ResponseStatus(res, 400, "Failed to create order");
@@ -63,6 +62,7 @@ exports.createOrder = async (req, res) => {
 exports.listOrder = async (req, res) => {
   const { id } = req.params;
   const results = await orderModel.getTransactionByUserId(id);
+  console.log(results);
   if (results) {
     return status.ResponseStatus(res, 200, "List of all Order", results);
   }

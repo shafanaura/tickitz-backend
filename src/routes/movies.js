@@ -2,7 +2,7 @@ const routes = require("express").Router();
 const movieController = require("../controllers/movie");
 const authMiddleware = require("../middlewares/auth");
 const Role = require("../utils/userRoles.utils");
-const uploadImage = require("../helpers/uploadFileMovie");
+const uploadImage = require("../middlewares/uploadFileMovie");
 const validator = require("../middlewares/validator");
 
 routes
@@ -31,7 +31,6 @@ routes
     authMiddleware.authCheck,
     authMiddleware.authRole(Role.Admin),
     uploadImage,
-    validator.validationResult,
     movieController.updateMovie
   )
   // .patch(
@@ -42,6 +41,7 @@ routes
   .put(
     authMiddleware.authCheck,
     authMiddleware.authRole(Role.Admin),
+    uploadImage,
     movieController.updateMovie
   );
 

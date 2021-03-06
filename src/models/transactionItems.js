@@ -18,8 +18,8 @@ exports.createTransactionItems = (data = {}, cb) => {
 exports.createBulkTransactionItems = async (id, data = []) => {
   return new Promise((resolve, reject) => {
     dbConn.query(
-      `INSERT INTO ${table} (idTransaction, idSeat) VALUES ${data
-        .map((idSeat) => `(${id}, ${idSeat})`)
+      `INSERT INTO ${table} (idTransaction, seatName) VALUES ${data
+        .map((seatName) => `(${id}, ${seatName})`)
         .join()}`,
       (err, res, field) => {
         if (err) reject(err);

@@ -3,7 +3,7 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/movie");
+    cb(null, "uploads/cinema");
   },
   filename: (req, file, cb) => {
     console.log(file);
@@ -28,14 +28,14 @@ const limits = {
   fileSize: 1 * 1024 * 1024,
 };
 
-const uploadMovies = multer({
+const uploadCinema = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: limits,
 }).single("picture");
 
 const upload = (req, res, next) => {
-  uploadMovies(req, res, (err) => {
+  uploadCinema(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       console.log(multer.MulterError);
       return res.json({

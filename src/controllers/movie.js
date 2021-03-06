@@ -2,9 +2,7 @@ const movieModel = require("../models/movies");
 const genreModel = require("../models/genres");
 const locationModel = require("../models/locations");
 const movieGenreModel = require("../models/movieGenres");
-const multer = require("multer");
-const upload = require("../helpers/uploadMovie").single("picture");
-const { APP_URL, APP_PORT } = process.env;
+const { APP_URL } = process.env;
 const status = require("../helpers/Response");
 const qs = require("querystring");
 const fs = require("fs");
@@ -187,7 +185,7 @@ exports.updateMovie = async (req, res) => {
   try {
     const { id } = req.params;
     const { ...data } = req.body;
-    const initialResult = await movieModel.getMovieByIdWithItems(id);
+    const initialResult = await movieModel.getMovieById(id);
     if (initialResult.length < 1) {
       return status.ResponseStatus(res, 404, "Movie not found");
     }
