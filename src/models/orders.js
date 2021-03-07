@@ -47,7 +47,7 @@ exports.getTransactionByUserId = async (id) => {
   return new Promise((resolve, reject) => {
     dbConn.query(
       `
-    SELECT cinemas.name as cinema, cinemas.picture as picture, movies.title as movie,
+    SELECT t.id, cinemas.name as cinema, cinemas.picture as picture, movies.title as movie,
     t.dateTime, times.name as time
     FROM ${table} t
     INNER JOIN movies ON t.idMovie = movies.id
