@@ -17,32 +17,32 @@ app.use(cors("*"));
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {
-	return res.json({
-		success: true,
-		message: "Backend is running well",
-	});
+  return res.json({
+    success: true,
+    message: "Backend is running well",
+  });
 });
 
 app.use(
-	"/",
-	require("./src/routes/movies"),
-	require("./src/routes/cinemas"),
-	require("./src/routes/genres"),
-	require("./src/routes/times"),
-	require("./src/routes/auth"),
-	require("./src/routes/orders"),
-	require("./src/routes/locations"),
-	require("./src/routes/seats"),
-	require("./src/routes/showtimes"),
+  "/",
+  require("./src/routes/movies"),
+  require("./src/routes/cinemas"),
+  require("./src/routes/genres"),
+  require("./src/routes/times"),
+  require("./src/routes/auth"),
+  require("./src/routes/orders"),
+  require("./src/routes/locations"),
+  require("./src/routes/seats"),
+  require("./src/routes/showtimes")
 );
 
 app.all("*", (req, res) => {
-	return status.ResponseStatus(res, 404, "Endpoint Not Found");
+  return status.ResponseStatus(res, 404, "Endpoint Not Found");
 });
 
 // Error middleware
 app.use(errorMiddleware);
 
 app.listen(APP_PORT, () => {
-	console.log(`App listening at http://localhost:${APP_PORT}`);
+  console.log(`App listening at http://34.200.156.212:${APP_PORT}`);
 });

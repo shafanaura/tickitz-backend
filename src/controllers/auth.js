@@ -38,12 +38,7 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const {
-      email,
-      password,
-      role = Role.User,
-      picture = "http://localhost:5000/uploads/user/picture-1615040228371-521784332.png",
-    } = req.body;
+    const { email, password, role = Role.User } = req.body;
     this.checkValidation(req, res);
     const isExist = await userModel.getUsersByCondition({ email });
     if (isExist.length < 1) {
