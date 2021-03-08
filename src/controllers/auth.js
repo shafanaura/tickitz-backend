@@ -38,7 +38,12 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const { email, password, role = Role.User } = req.body;
+    const {
+      email,
+      password,
+      role = Role.User,
+      picture = "https://t4.ftcdn.net/jpg/03/32/59/65/360_F_332596535_lAdLhf6KzbW6PWXBWeIFTovTii1drkbT.jpg",
+    } = req.body;
     this.checkValidation(req, res);
     const isExist = await userModel.getUsersByCondition({ email });
     if (isExist.length < 1) {
@@ -48,6 +53,7 @@ exports.register = async (req, res) => {
         email,
         role,
         password: encryptedPassword,
+        picture,
       });
       if (createUser.insertId > 0) {
         return status.ResponseStatus(res, 200, "Register Success");
