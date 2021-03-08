@@ -48,7 +48,6 @@ exports.register = async (req, res) => {
         email,
         role,
         password: encryptedPassword,
-        picture,
       });
       if (createUser.insertId > 0) {
         return status.ResponseStatus(res, 200, "Register Success");
