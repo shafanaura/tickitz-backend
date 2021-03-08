@@ -29,6 +29,7 @@ routes
   .patch(
     authMiddleware.authCheck,
     authMiddleware.authRole(Role.Admin),
+    uploadImage,
     cinemaController.updateCinema
   )
   .put(
