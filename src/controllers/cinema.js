@@ -139,18 +139,36 @@ exports.deleteCinema = async (req, res) => {
 };
 
 exports.updateCinema = async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
-  const initialResult = await cinemaModel.getCinemaByIdWithTime(id);
-  if (initialResult.length > 0) {
-    const results = cinemaModel.updateCinema(id, data);
-    if (results) {
+  try {
+    const { id } = req.params;
+    const { ...data } = req.body;
+    const initialResult = await cinemaModel.getCinemaById(id);
+    if (initialResult.length < 1) {
+      return status.ResponseStatus(res, 404, "Cinema not found");
+    }
+
+    if (req.file) {
+      const picture = `${APP_URL}${req.file.destination}/${req.file.filename}`;
+      const uploadImage = await cinemaModel.updateCinema(id, { picture });
+      if (uploadImage.affectedRows > 0) {
+        // if (initialResult[0].picture !== null) {
+        //   fs.unlinkSync(`uploads/movie/${initialResult[0].picture}`);
+        // }
+        return status.ResponseStatus(res, 200, "Image hash been Updated");
+      }
+      return status.ResponseStatus(res, 400, "Can't update Image");
+    }
+
+    const finalResult = await cinemaModel.updateCinema(id, data);
+    if (finalResult.affectedRows > 0) {
       return status.ResponseStatus(res, 200, "data successfully updated", {
         ...initialResult[0],
         ...data,
       });
     }
-  } else {
     return status.ResponseStatus(res, 400, "Failed to update data");
+  } catch (err) {
+    console.log(err);
+    return status.ResponseStatus(res, 400, "Bad Request");
   }
 };
