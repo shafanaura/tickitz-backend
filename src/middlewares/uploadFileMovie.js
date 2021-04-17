@@ -3,7 +3,7 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/movie");
+    cb(null, "public/uploads/movie");
   },
   filename: (req, file, cb) => {
     console.log(file);
@@ -25,7 +25,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 const limits = {
-  fileSize: 4 * 1024 * 1024,
+  fileSize: 1 * 1024 * 1024,
 };
 
 const uploadMovies = multer({
@@ -46,7 +46,7 @@ const upload = (req, res, next) => {
       console.log(err);
       return res.json({
         success: false,
-        message: "Failed to upload picture!",
+        message: err.message,
       });
     }
     next();

@@ -60,7 +60,7 @@ exports.createOrder = async (req, res) => {
 };
 
 exports.listOrder = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.userData;
   const results = await orderModel.getTransactionByUserId(id);
   console.log(results);
   if (results) {

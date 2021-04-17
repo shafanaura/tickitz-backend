@@ -5,11 +5,13 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const status = require("./src/helpers/Response");
+const path = require("path");
 
 dotenv.config();
 const { APP_PORT } = process.env;
 const app = express();
 
+app.use(express.static(path.join(__dirname, "./public")));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 app.use(cors("*"));
@@ -25,6 +27,7 @@ app.get("/", (req, res) => {
 
 app.use(
   "/",
+  require("./src/routes/user"),
   require("./src/routes/movies"),
   require("./src/routes/cinemas"),
   require("./src/routes/genres"),

@@ -3,7 +3,7 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/cinema");
+    cb(null, "public/uploads/cinema");
   },
   filename: (req, file, cb) => {
     console.log(file);
@@ -46,7 +46,7 @@ const upload = (req, res, next) => {
       console.log(err);
       return res.json({
         success: false,
-        message: "Failed to upload picture!",
+        message: err.message,
       });
     }
     next();

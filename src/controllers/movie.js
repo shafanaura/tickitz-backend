@@ -2,7 +2,7 @@ const movieModel = require("../models/movies");
 const genreModel = require("../models/genres");
 const locationModel = require("../models/locations");
 const movieGenreModel = require("../models/movieGenres");
-const { APP_URL } = process.env;
+const { APP_URL, FILE_URL } = process.env;
 const status = require("../helpers/Response");
 const qs = require("querystring");
 const fs = require("fs");
@@ -53,7 +53,7 @@ exports.createMovie = async (req, res) => {
   }
   const movieData = {
     title: data.title,
-    picture: `${APP_URL}${req.file.destination}/${req.file.filename}` || null,
+    picture: req.file.filename || null,
     releaseDate: data.releaseDate,
     directed: data.directed,
     duration: data.duration,
@@ -100,14 +100,16 @@ exports.detailMovie = async (req, res) => {
     return status.ResponseStatus(res, 200, "Details of movie", {
       id: results[0].id,
       title: results[0].title,
-      picture: results[0].picture,
+      picture:
+        results[0].picture === null
+          ? results[0].picture
+          : `${FILE_URL}movie/${results[0].picture}`,
       releaseDate: results[0].releaseDate,
       directed: results[0].directed,
       duration: results[0].duration,
       cast: results[0].cast,
       synopsis: results[0].synopsis,
       genreName: results.map(({ genreName }) => genreName),
-      locationName: results.map(({ locationName }) => locationName),
     });
   } else {
     return status.ResponseStatus(res, 400, "Movie not exists");
@@ -152,12 +154,19 @@ exports.listMovies = async (req, res) => {
     cond.page > 1 ? APP_URL.concat(`movies?${prevQuery}`) : null;
 
   const results = await movieModel.getMoviesByCondition(cond);
+  const modified = results.map((item) => ({
+    ...item,
+    picture:
+      item.picture === null
+        ? item.picture
+        : FILE_URL.concat(`movie/${item.picture}`),
+  }));
   if (results) {
     return status.ResponseStatus(
       res,
       200,
       "List of all movies",
-      results,
+      modified,
       pageInfo
     );
   }
@@ -191,12 +200,12 @@ exports.updateMovie = async (req, res) => {
     }
 
     if (req.file) {
-      const picture = `${APP_URL}${req.file.destination}/${req.file.filename}`;
+      const picture = req.file.filename;
       const uploadImage = await movieModel.updateMovie(id, { picture });
       if (uploadImage.affectedRows > 0) {
-        // if (initialResult[0].picture !== null) {
-        //   fs.unlinkSync(`uploads/movie/${initialResult[0].picture}`);
-        // }
+        if (initialResult[0].picture !== null) {
+          fs.unlinkSync(`public/uploads/movie/${initialResult[0].picture}`);
+        }
         return status.ResponseStatus(res, 200, "Image hash been Updated");
       }
       return status.ResponseStatus(res, 400, "Can't update Image");

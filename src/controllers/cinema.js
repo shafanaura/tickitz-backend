@@ -3,7 +3,8 @@ const timeModel = require("../models/times");
 const multer = require("multer");
 const qs = require("querystring");
 const status = require("../helpers/Response");
-const { APP_URL } = process.env;
+const { APP_URL, FILE_URL } = process.env;
+const fs = require("fs");
 
 exports.createCinema = async (req, res) => {
   const data = req.body;
@@ -29,7 +30,7 @@ exports.createCinema = async (req, res) => {
   }
   const cinemaData = {
     name: data.name,
-    picture: `${APP_URL}${req.file.destination}/${req.file.filename}` || null,
+    picture: req.file.filename || null,
     address: data.address,
     price: data.price,
     // createdBy: req.userData.id,
@@ -61,10 +62,12 @@ exports.detailCinema = async (req, res) => {
     return status.ResponseStatus(res, 200, "Details of cinema", {
       id: results[0].id,
       name: results[0].name,
-      picture: results[0].picture,
+      picture:
+        results[0].picture === null
+          ? results[0].picture
+          : `${FILE_URL}cinema/${results[0].picture}`,
       address: results[0].address,
       price: results[0].price,
-      timeName: results.map(({ timeName }) => timeName),
     });
   } else {
     return status.ResponseStatus(res, 400, "Cinema not exists");
@@ -109,12 +112,19 @@ exports.listCinemas = async (req, res) => {
     cond.page > 1 ? APP_URL.concat(`/cinemas?${prevQuery}`) : null;
 
   const results = await cinemaModel.getCinemasByCondition(cond);
+  const modified = results.map((item) => ({
+    ...item,
+    picture:
+      item.picture === null
+        ? item.picture
+        : FILE_URL.concat(`cinema/${item.picture}`),
+  }));
   if (results) {
     return status.ResponseStatus(
       res,
       200,
       "List of all cinemas",
-      results,
+      modified,
       pageInfo
     );
   }
@@ -148,12 +158,12 @@ exports.updateCinema = async (req, res) => {
     }
 
     if (req.file) {
-      const picture = `${APP_URL}${req.file.destination}/${req.file.filename}`;
+      const picture = req.file.filename;
       const uploadImage = await cinemaModel.updateCinema(id, { picture });
       if (uploadImage.affectedRows > 0) {
-        // if (initialResult[0].picture !== null) {
-        //   fs.unlinkSync(`uploads/movie/${initialResult[0].picture}`);
-        // }
+        if (initialResult[0].picture !== null) {
+          fs.unlinkSync(`public/uploads/cinema/${initialResult[0].picture}`);
+        }
         return status.ResponseStatus(res, 200, "Image hash been Updated");
       }
       return status.ResponseStatus(res, 400, "Can't update Image");
