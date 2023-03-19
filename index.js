@@ -44,5 +44,5 @@ app.all("*", (req, res) => {
 app.use(errorMiddleware);
 
 app.listen(APP_PORT, () => {
-  console.log(`App listening at http://34.200.156.212:${APP_PORT}`);
+  console.log(`App listening at http://localhost:${APP_PORT}`);
 });
